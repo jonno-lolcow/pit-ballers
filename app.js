@@ -1,8 +1,7 @@
 // ==========================
-// Pit Ballers — MVP
+// Pit Ballers — v2 UI + 4 ratings
 // ==========================
 
-// --- Teams ---
 const TEAM_NAMES = [
   "Lolcow Balls",
   "Lolcow Pit",
@@ -33,17 +32,23 @@ const TEAM_NAMES = [
 ];
 
 function fileFromName(name) {
-  // Spaces -> underscores, keep parentheses as-is (matches your file naming)
   return name.replaceAll(" ", "_");
 }
 
 const TEAMS = TEAM_NAMES.map((name, idx) => ({
   id: `t${String(idx + 1).padStart(2, "0")}`,
   name,
-  base: 50, // edit per team later
+  funny: 50,
+  obs: 50,
+  cow: 50,
+  money: 50,
   cardImg: `img/teams/${fileFromName(name)}.png`,
-  players: [], // cosmetic only for MVP
 }));
+
+function overallScore(team) {
+  const avg = (team.funny + team.obs + team.cow + team.money) / 4;
+  return Math.round(avg);
+}
 
 // --- Utilities ---
 function $(id) { return document.getElementById(id); }
@@ -64,9 +69,12 @@ function setView(name) {
   for (const v of views) $(v).classList.toggle("hidden", v !== name);
 }
 
-// --- Carousel ---
-function createCarousel(containerEl, teams, initialIndex = 0) {
+// --- Carousel (browser = 1920, picker = 960) ---
+function createCarousel(containerEl, teams, initialIndex = 0, variant = "browser") {
   let idx = initialIndex;
+
+  containerEl.classList.toggle("browser", variant === "browser");
+  containerEl.classList.toggle("picker", variant === "picker");
 
   const left = document.createElement("button");
   left.className = "navBtn";
@@ -79,20 +87,18 @@ function createCarousel(containerEl, teams, initialIndex = 0) {
   const wrap = document.createElement("div");
   wrap.className = "cardWrap";
 
+  const heading = document.createElement("div");
+  heading.className = "cardHeading";
+
   const img = document.createElement("img");
   img.alt = "team card";
 
-  const meta = document.createElement("div");
-  meta.className = "meta";
-  const nameEl = document.createElement("div");
-  nameEl.className = "name";
-  const subEl = document.createElement("div");
-  subEl.className = "sub";
-  meta.appendChild(nameEl);
-  meta.appendChild(subEl);
+  const footer = document.createElement("div");
+  footer.className = "cardFooter";
 
+  wrap.appendChild(heading);
   wrap.appendChild(img);
-  wrap.appendChild(meta);
+  wrap.appendChild(footer);
 
   containerEl.innerHTML = "";
   containerEl.appendChild(left);
@@ -101,25 +107,17 @@ function createCarousel(containerEl, teams, initialIndex = 0) {
 
   function render() {
     const t = teams[idx];
+    heading.textContent = t.name;
     img.src = t.cardImg;
-    nameEl.textContent = t.name;
-    subEl.textContent = `Base: ${t.base}`;
+    footer.textContent = `Overall Score: ${overallScore(t)}`;
   }
 
-  function prev() {
-    idx = (idx - 1 + teams.length) % teams.length;
-    render();
-  }
-
-  function next() {
-    idx = (idx + 1) % teams.length;
-    render();
-  }
+  function prev() { idx = (idx - 1 + teams.length) % teams.length; render(); }
+  function next() { idx = (idx + 1) % teams.length; render(); }
 
   left.addEventListener("click", prev);
   right.addEventListener("click", next);
 
-  // lightweight keyboard support when carousel is visible
   function onKey(e) {
     if (containerEl.closest(".hidden")) return;
     if (e.key === "ArrowLeft") prev();
@@ -137,21 +135,19 @@ function createCarousel(containerEl, teams, initialIndex = 0) {
   };
 }
 
-// --- Match simulation ---
+// --- Match simulation (overall + form RNG) ---
 function choose2or3() {
-  // Feel free to tweak the 3pt rate
   return Math.random() < 0.7 ? 2 : 3;
 }
 
-function computeEffective(base) {
-  // Base dominates; "form" is lighter and varies each run
+function computeEffective(overall) {
+  // Base dominates; form is lighter
   const form = randInt(-10, 10);
-  const effective = base * 0.85 + (base + form) * 0.15;
+  const effective = overall * 0.85 + (overall + form) * 0.15;
   return { form, effective };
 }
 
 function buildScoringEvents() {
-  // Arcade-ish scoring density
   const eventCount = randInt(18, 34);
   const times = [];
   for (let i = 0; i < eventCount; i++) times.push(Math.random() * 30000);
@@ -160,8 +156,11 @@ function buildScoringEvents() {
 }
 
 function planMatch(teamA, teamB) {
-  const A = computeEffective(teamA.base);
-  const B = computeEffective(teamB.base);
+  const oA = overallScore(teamA);
+  const oB = overallScore(teamB);
+
+  const A = computeEffective(oA);
+  const B = computeEffective(oB);
 
   const events = buildScoringEvents();
   const denom = (A.effective + B.effective) || 1;
@@ -173,15 +172,11 @@ function planMatch(teamA, teamB) {
     return { ...e, scorer, points };
   });
 
-  return { planned, meta: { A, B } };
+  return { planned, meta: { A, B, oA, oB } };
 }
 
 function runMatchRealtime(teamA, teamB, opts) {
-  const {
-    onUpdate,
-    onDone,
-  } = opts;
-
+  const { onUpdate, onDone } = opts;
   const DURATION = 30000;
   let speed = 1;
 
@@ -210,7 +205,6 @@ function runMatchRealtime(teamA, teamB, opts) {
     const elapsedReal = now - start;
     const elapsed = elapsedReal * speed;
 
-    // Apply any events that should have happened by now
     while (i < planned.length && planned[i].t <= elapsed) {
       const ev = planned[i];
       applyEvent(ev);
@@ -249,7 +243,7 @@ function generateBracket32(teams) {
 
   const slots = [];
   for (const t of shuffled) slots.push(t);
-  while (slots.length < 32) slots.push({ id: `bye${slots.length}`, name: "BYE", base: 0, isBye: true });
+  while (slots.length < 32) slots.push({ id: `bye${slots.length}`, name: "BYE", isBye: true });
 
   const round1 = [];
   for (let i = 0; i < 32; i += 2) {
@@ -260,7 +254,7 @@ function generateBracket32(teams) {
     rounds: [round1],
     currentRound: 1,
     currentMatchIndex: 0,
-    history: [], // completed matches
+    history: [],
     winner: null,
     awards: { bigScorer: null, biggestLoser: null },
   };
@@ -273,7 +267,6 @@ function renderBracket(tour) {
   if (!tour) { el.textContent = "No bracket yet."; return; }
   el.innerHTML = "";
 
-  // Only render rounds we have generated so far
   for (let r = 0; r < tour.rounds.length; r++) {
     const roundNum = r + 1;
     const title = document.createElement("div");
@@ -330,39 +323,31 @@ function setNextMatchText(tour) {
   const el = $("nextMatch");
   if (!tour) { el.textContent = "Generate a bracket to begin."; return; }
 
-  // find next playable match
   const roundArr = tour.rounds[tour.currentRound - 1];
   if (!roundArr) { el.textContent = "Tournament complete."; return; }
 
   while (tour.currentMatchIndex < roundArr.length) {
     const m = roundArr[tour.currentMatchIndex];
 
-    // Already resolved?
     if (m.result) { tour.currentMatchIndex++; continue; }
 
-    // Auto-resolve BYEs
     if (isBye(m.a) && !isBye(m.b)) {
       resolveMatchResult(tour, m, { winner: m.b, loser: m.a, scoreA: 0, scoreB: 0, skipped: true, isAuto: true });
-      tour.currentMatchIndex++;
-      continue;
+      tour.currentMatchIndex++; continue;
     }
     if (!isBye(m.a) && isBye(m.b)) {
       resolveMatchResult(tour, m, { winner: m.a, loser: m.b, scoreA: 0, scoreB: 0, skipped: true, isAuto: true });
-      tour.currentMatchIndex++;
-      continue;
+      tour.currentMatchIndex++; continue;
     }
     if (isBye(m.a) && isBye(m.b)) {
-      // ignore
       resolveMatchResult(tour, m, { winner: m.a, loser: m.b, scoreA: 0, scoreB: 0, skipped: true, isAuto: true });
-      tour.currentMatchIndex++;
-      continue;
+      tour.currentMatchIndex++; continue;
     }
 
     el.textContent = `Round ${m.round}: ${m.a.name} vs ${m.b.name}`;
     return;
   }
 
-  // Round finished -> build next round
   buildNextRoundIfNeeded(tour);
   setNextMatchText(tour);
 }
@@ -372,7 +357,6 @@ function buildNextRoundIfNeeded(tour) {
   const allResolved = roundArr.every(m => !!m.result);
   if (!allResolved) return;
 
-  // Gather winners
   const winners = roundArr.map(m => m.result.winner).filter(w => !isBye(w));
 
   if (winners.length === 1) {
@@ -380,7 +364,6 @@ function buildNextRoundIfNeeded(tour) {
     return;
   }
 
-  // Create next round matches from winners
   const next = [];
   for (let i = 0; i < winners.length; i += 2) {
     next.push({
@@ -410,20 +393,16 @@ function considerBiggestLoser(tour, eliminatedTeam, roundEliminated) {
 
   if (!cur) { tour.awards.biggestLoser = entry; return; }
   if (roundEliminated < cur.roundEliminated) { tour.awards.biggestLoser = entry; return; }
-  if (roundEliminated === cur.roundEliminated && eliminatedTeam.base > cur.team.base) {
+  if (roundEliminated === cur.roundEliminated && overallScore(eliminatedTeam) > overallScore(cur.team)) {
     tour.awards.biggestLoser = entry;
   }
 }
 
 function resolveMatchResult(tour, match, payload) {
   const { winner, loser, scoreA, scoreB, skipped, isAuto } = payload;
-
   match.result = { winner, loser, scoreA, scoreB, skipped, isAuto };
 
-  // awards
   if (!isAuto) recordBigScorer(tour, match.a, match.b, scoreA, scoreB, match.round);
-
-  // Biggest Loser: earliest knockout with highest base stat
   if (!isAuto) considerBiggestLoser(tour, loser, match.round);
 
   tour.history.push(match);
@@ -444,14 +423,10 @@ let matchController = null;
 let pendingContinue = null;
 
 function init() {
-  // Home browser carousel
-  browser = createCarousel($("browserCarousel"), TEAMS, 0);
+  browser = createCarousel($("browserCarousel"), TEAMS, 0, "browser");
+  pickerA = createCarousel($("pickA"), TEAMS, 0, "picker");
+  pickerB = createCarousel($("pickB"), TEAMS, 1, "picker");
 
-  // H2H carousels
-  pickerA = createCarousel($("pickA"), TEAMS, 0);
-  pickerB = createCarousel($("pickB"), TEAMS, 1);
-
-  // Navigation
   $("btnHome").addEventListener("click", () => goHome());
   $("goH2H").addEventListener("click", () => {
     currentMode = "H2H";
@@ -464,38 +439,40 @@ function init() {
     resetTournamentUI();
   });
 
-  // H2H setup actions
   $("setA").addEventListener("click", () => {
     chosenTeamA = pickerA.getTeam();
-    $("chosenA").textContent = `${chosenTeamA.name} (Base ${chosenTeamA.base})`;
+    $("chosenA").textContent = `${chosenTeamA.name} (Overall ${overallScore(chosenTeamA)})`;
   });
   $("setB").addEventListener("click", () => {
     chosenTeamB = pickerB.getTeam();
-    $("chosenB").textContent = `${chosenTeamB.name} (Base ${chosenTeamB.base})`;
+    $("chosenB").textContent = `${chosenTeamB.name} (Overall ${overallScore(chosenTeamB)})`;
   });
+
   $("randH2H").addEventListener("click", () => {
     const i = randInt(0, TEAMS.length - 1);
     let j = randInt(0, TEAMS.length - 1);
     while (j === i) j = randInt(0, TEAMS.length - 1);
+
     pickerA.setIndex(i);
     pickerB.setIndex(j);
+
     chosenTeamA = TEAMS[i];
     chosenTeamB = TEAMS[j];
-    $("chosenA").textContent = `${chosenTeamA.name} (Base ${chosenTeamA.base})`;
-    $("chosenB").textContent = `${chosenTeamB.name} (Base ${chosenTeamB.base})`;
+
+    $("chosenA").textContent = `${chosenTeamA.name} (Overall ${overallScore(chosenTeamA)})`;
+    $("chosenB").textContent = `${chosenTeamB.name} (Overall ${overallScore(chosenTeamB)})`;
   });
+
   $("startH2H").addEventListener("click", () => {
     if (!chosenTeamA || !chosenTeamB || chosenTeamA.id === chosenTeamB.id) return;
+
     startMatch(chosenTeamA, chosenTeamB, {
       title: "Head-to-Head",
-      onComplete: (result) => {
-        showResultsH2H(chosenTeamA, chosenTeamB, result);
-      },
+      onComplete: (result) => showResultsH2H(chosenTeamA, chosenTeamB, result),
       continueLabel: "View Results",
     });
   });
 
-  // Tournament setup
   $("genTour").addEventListener("click", () => {
     currentTour = generateBracket32(TEAMS);
     renderBracket(currentTour);
@@ -510,7 +487,6 @@ function init() {
 
   $("playNext").addEventListener("click", () => playNextTournamentMatch());
 
-  // Match controls
   $("speed1").addEventListener("click", () => setSpeedUI(1));
   $("speed2").addEventListener("click", () => setSpeedUI(2));
   $("speed4").addEventListener("click", () => setSpeedUI(4));
@@ -522,10 +498,8 @@ function init() {
   });
   $("continueAfterMatch").addEventListener("click", () => pendingContinue?.());
 
-  // Results
   $("playAgain").addEventListener("click", () => goHome());
 
-  // Start at home
   goHome();
 }
 
@@ -547,11 +521,20 @@ function resetTournamentUI() {
 }
 
 function setSpeedUI(speed) {
-  // UI chips
   for (const [id, s] of [["speed1", 1], ["speed2", 2], ["speed4", 4]]) {
     $(id).classList.toggle("active", s === speed);
   }
   matchController?.setSpeed(speed);
+}
+
+function hydrateMatchCards(teamA, teamB) {
+  $("mcNameA").textContent = teamA.name;
+  $("mcImgA").src = teamA.cardImg;
+  $("mcOverallA").textContent = `Overall Score: ${overallScore(teamA)}`;
+
+  $("mcNameB").textContent = teamB.name;
+  $("mcImgB").src = teamB.cardImg;
+  $("mcOverallB").textContent = `Overall Score: ${overallScore(teamB)}`;
 }
 
 function startMatch(teamA, teamB, opts) {
@@ -565,17 +548,17 @@ function startMatch(teamA, teamB, opts) {
   $("lastEvent").textContent = "—";
   $("mClock").textContent = "30.0s";
 
+  hydrateMatchCards(teamA, teamB);
+
   $("backAfterMatch").classList.add("hidden");
   $("continueAfterMatch").classList.add("hidden");
 
   setSpeedUI(1);
-
-  // stop any prior controller
   matchController = null;
   pendingContinue = null;
 
   matchController = runMatchRealtime(teamA, teamB, {
-    onUpdate: ({ elapsedMs, scoreA, scoreB, lastEvent, speed }) => {
+    onUpdate: ({ elapsedMs, scoreA, scoreB, lastEvent }) => {
       const remaining = Math.max(0, 30000 - elapsedMs);
       $("mClock").textContent = `${(remaining / 1000).toFixed(1)}s`;
       $("mScoreA").textContent = String(scoreA);
@@ -603,12 +586,11 @@ function startMatch(teamA, teamB, opts) {
 
 function showResultsH2H(teamA, teamB, result) {
   const winner = result.scoreA === result.scoreB
-    ? (Math.random() < 0.5 ? teamA : teamB) // tie-break coin flip for MVP
+    ? (Math.random() < 0.5 ? teamA : teamB)
     : (result.scoreA > result.scoreB ? teamA : teamB);
 
   const body = $("resultsBody");
   body.innerHTML = "";
-
   body.appendChild(resultItem("Winner", winner.name));
   body.appendChild(resultItem("Final Score", `${teamA.name} ${result.scoreA} — ${result.scoreB} ${teamB.name}`));
 
@@ -618,7 +600,6 @@ function showResultsH2H(teamA, teamB, result) {
 function playNextTournamentMatch() {
   if (!currentTour) return;
 
-  // Ensure next match pointer is pointing to a playable match (auto resolves BYEs)
   setNextMatchText(currentTour);
 
   if (currentTour.winner) {
@@ -629,13 +610,13 @@ function playNextTournamentMatch() {
   const roundArr = currentTour.rounds[currentTour.currentRound - 1];
   if (!roundArr) return;
 
-  // find current match
   let m = null;
   while (currentTour.currentMatchIndex < roundArr.length) {
     const candidate = roundArr[currentTour.currentMatchIndex];
     if (!candidate.result && !isBye(candidate.a) && !isBye(candidate.b)) { m = candidate; break; }
     currentTour.currentMatchIndex++;
   }
+
   if (!m) {
     buildNextRoundIfNeeded(currentTour);
     setNextMatchText(currentTour);
@@ -647,7 +628,6 @@ function playNextTournamentMatch() {
     title: `Tournament — Round ${m.round}`,
     continueLabel: "Continue Tournament",
     onComplete: (res) => {
-      // Determine winner (no OT in MVP; coin flip ties)
       let winner, loser;
       if (res.scoreA === res.scoreB) {
         winner = Math.random() < 0.5 ? m.a : m.b;
@@ -673,7 +653,6 @@ function playNextTournamentMatch() {
       setNextMatchText(currentTour);
 
       setView("viewTour");
-
       if (currentTour.winner) showTournamentResults();
     }
   });
@@ -699,11 +678,11 @@ function showTournamentResults() {
   if (tour.awards.biggestLoser) {
     const bl = tour.awards.biggestLoser;
     body.appendChild(resultItem(
-      "Biggest Loser (Earliest Knockout w/ Highest Base)",
-      `${bl.team.name} (Base ${bl.team.base}) — eliminated in Round ${bl.roundEliminated}`
+      "Biggest Loser (Earliest Knockout w/ Highest Overall)",
+      `${bl.team.name} (Overall ${overallScore(bl.team)}) — eliminated in Round ${bl.roundEliminated}`
     ));
   } else {
-    body.appendChild(resultItem("Biggest Loser (Earliest Knockout w/ Highest Base)", "—"));
+    body.appendChild(resultItem("Biggest Loser (Earliest Knockout w/ Highest Overall)", "—"));
   }
 
   setView("viewResults");
