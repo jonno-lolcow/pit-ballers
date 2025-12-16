@@ -22,7 +22,7 @@ body{
     var(--bg);
 }
 
-/* ========= Header ========= */
+/* Header */
 .topbar{
   display:grid;
   grid-template-columns:1fr auto 1fr;
@@ -50,12 +50,13 @@ body{
 .top-actions{ justify-self:end; }
 .top-left{ justify-self:start; }
 
-/* ========= Layout ========= */
+/* Layout */
 .wrap{
-  max-width: 1180px;
+  max-width: min(1400px, 96vw);
   margin: 14px auto 44px;
   padding: 0 14px;
 }
+
 .view{ display:grid; gap:12px; }
 .hidden{ display:none; }
 
@@ -78,7 +79,7 @@ h3{ font-size:16px; }
   margin:8px 0 0;
 }
 
-/* ========= Controls ========= */
+/* Controls */
 .row{
   display:flex;
   gap:10px;
@@ -129,30 +130,27 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
   opacity:.9;
 }
 
-/* ========= Home (desktop-first) ========= */
+/* Home layout (desktop-first) */
 .homeLayout{
   display:grid;
   grid-template-columns: 1fr 260px;
   gap:12px;
   align-items:start;
 }
-
-/* Desktop responsiveness (not mobile-targeted) */
 @media (max-width: 1100px){
   .homeLayout{ grid-template-columns: 1fr 240px; }
 }
 @media (max-width: 980px){
-  /* stack on small screens; still usable but not “mobile ready” */
+  /* still usable, but not “mobile designed” */
   .homeLayout{ grid-template-columns: 1fr; }
 }
-
 .sidePanel{
   position:sticky;
   top:78px;
   align-self:start;
 }
 
-/* ========= Arcade selector ========= */
+/* Arcade selector */
 .arcadeSelector{
   display:grid;
   grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
@@ -208,7 +206,7 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
 }
 .arcadeIcon:hover::after{ opacity:1; }
 
-/* ========= Carousel ========= */
+/* Carousel */
 .carousel{
   display:grid;
   grid-template-columns:56px 1fr 56px;
@@ -245,7 +243,7 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
   text-align:center;
 }
 
-/* Browser carousel: large square but fits viewport */
+/* Browser: large square but fits viewport */
 .carousel.browser img{
   width: min(1200px, 88vw, 56vh);
   height:min(1200px, 88vw, 56vh);
@@ -254,14 +252,14 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
   object-fit:cover;
 }
 
-/* ========= H2H ========= */
+/* Head-to-Head grid */
 .grid2{
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap:12px;
 }
 
-/* Desktop-first: prevent scroll in H2H */
+/* H2H: fit viewport height, and ensure both columns actually fit */
 #viewH2H .card{
   height: calc(100vh - 110px);
   overflow: hidden;
@@ -270,24 +268,23 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
   height: calc(100% - 62px);
   align-items:start;
 }
-#viewH2H .row.spaced{
-  margin-top: 10px;
-}
-
-/* H2H pickers: size chosen to fit two columns without scroll */
-.carousel.picker img{
-  width: min(680px, 40vw, 34vh);
-  height:min(680px, 40vw, 34vh);
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,.08);
-  object-fit:cover;
-}
 #viewH2H .carousel .cardWrap{
   padding:8px;
   gap:6px;
 }
 
-/* ========= Tournament Bracket ========= */
+/* Key fix: size pickers by container width (not vw) */
+.carousel.picker img{
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.08);
+  object-fit:cover;
+}
+
+/* Tournament bracket */
 .bracket{ display:grid; gap:12px; }
 
 .roundSection{
@@ -310,141 +307,4 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
 
 .roundHeader .meta{
   color: var(--muted);
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.roundBody{
-  padding:10px;
-  display:grid;
-  gap:10px;
-}
-
-.roundSection.collapsed .roundBody{ display:none; }
-
-.matchLine{
-  display:grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap:10px;
-  align-items:center;
-  padding:10px;
-  border:1px solid var(--border);
-  border-radius:12px;
-  background: rgba(0,0,0,.12);
-}
-
-.vs{ color:var(--muted); font-weight:1000; }
-
-.teamCell{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  min-width:0;
-}
-.teamCell.right{ justify-content:flex-end; }
-
-.teamIcon{
-  width:22px;
-  height:22px;
-  border-radius:6px;
-  border:1px solid rgba(255,255,255,.10);
-  object-fit:cover;
-  flex: 0 0 auto;
-}
-
-.teamNameText{
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-
-.teamNameText.win{ color: var(--win); font-weight:1000; }
-.teamNameText.lose{ color: var(--lose); font-weight:1000; }
-.teamNameText.bye{ color: var(--muted); }
-
-.small{
-  grid-column: 1 / -1;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-/* ========= Match View ========= */
-.scoreboard{
-  display:grid;
-  grid-template-columns:1fr 260px 1fr;
-  gap:12px;
-  align-items:center;
-}
-
-.team{
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:12px;
-  background:rgba(0,0,0,.12);
-}
-.teamName{
-  font-weight:1000;
-  text-align:center;
-  margin-bottom:6px;
-}
-.score{
-  font-size:46px;
-  font-weight:1000;
-  text-align:center;
-  letter-spacing:1px;
-}
-
-.center{
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:12px;
-  background:rgba(0,0,0,.12);
-  text-align:center;
-}
-.clock{
-  font-weight:1000;
-  font-size:28px;
-  margin-bottom:10px;
-}
-.chip{
-  padding:8px 10px;
-  border-radius:999px;
-  font-weight:1000;
-}
-.chip.active{ border-color:rgba(78,161,255,.75); }
-
-.matchCards{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-  margin-top:12px;
-}
-.matchCard{
-  display:grid;
-  justify-items:center;
-  gap:8px;
-  padding:10px;
-  border:1px solid var(--border);
-  border-radius:16px;
-  background:rgba(0,0,0,.12);
-}
-
-/* Match cards: fit vertically (desktop) */
-.matchCard img{
-  width: min(960px, 42vw, 34vh);
-  height:min(960px, 42vw, 34vh);
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,.08);
-  object-fit:cover;
-}
-
-/* ========= Results ========= */
-.results{ display:grid; gap:10px; }
-.resultItem{
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:12px;
-  background:rgba(0,0,0,.12);
-}
-.resultItem .k{ color:var(--muted); font-size:12px; }
-.resultItem .v{ font-weight:1000; font-size:16px; margin-top:4px; }
+  font-size: 12
