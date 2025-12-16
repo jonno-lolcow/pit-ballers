@@ -1,5 +1,9 @@
 // ==========================
-// Pit Ballers — Full MVP+ (Arcade selector + right panel)
+// Pit Ballers — Full MVP+
+// - Arcade selector + browser carousel
+// - H2H (no-scroll sizing handled via CSS)
+// - Tournament: 32-slot with 6 BYEs in Round 1 ONLY (never BYE vs BYE)
+// - Bracket: icons + winner green / loser red + auto-collapse finished rounds
 // ==========================
 
 const TEAM_NAMES = [
@@ -38,6 +42,7 @@ function fileFromName(name) {
 const TEAMS = TEAM_NAMES.map((name, idx) => ({
   id: `t${String(idx + 1).padStart(2, "0")}`,
   name,
+  // ratings (0-100). keep 50 for now.
   funny: 50,
   obs: 50,
   cow: 50,
@@ -91,7 +96,6 @@ function renderArcadeSelector(containerEl, teams, onPick) {
 
     btn.appendChild(img);
     btn.addEventListener("click", () => onPick(i));
-
     containerEl.appendChild(btn);
   });
 }
@@ -142,7 +146,6 @@ function createCarousel(containerEl, teams, initialIndex = 0, variant = "browser
     img.src = t.cardImg;
     footer.textContent = `Overall Score: ${overallScore(t)}`;
 
-    // keep arcade selector highlight synced with browser carousel
     if (variant === "browser") {
       const arcadeEl = document.getElementById("arcadeSelector");
       if (arcadeEl) setArcadeActive(arcadeEl, idx);
@@ -178,6 +181,7 @@ function choose2or3() {
 }
 
 function computeEffective(overall) {
+  // Base dominates; form is lighter
   const form = randInt(-10, 10);
   const effective = overall * 0.85 + (overall + form) * 0.15;
   return { form, effective };
@@ -274,15 +278,30 @@ function runMatchRealtime(teamA, teamB, opts) {
 }
 
 // --- Tournament ---
-function generateBracket32(teams) {
-  const shuffled = shuffle(teams);
+function isBye(t) { return !!t?.isBye; }
 
-  const slots = [...shuffled];
-  while (slots.length < 32) slots.push({ id: `bye${slots.length}`, name: "BYE", isBye: true });
+function generateBracket32(teams) {
+  // 26 teams -> 6 BYEs needed to fill 32
+  const shuffled = shuffle(teams);
+  const byesNeeded = 32 - shuffled.length; // 6
+  const byeObj = () => ({
+    id: `bye_${Math.random().toString(16).slice(2)}`,
+    name: "BYE",
+    isBye: true
+  });
+
+  // First 6 teams get paired with a BYE (never BYE vs BYE)
+  const byeTeams = shuffled.slice(0, byesNeeded);
+  const remaining = shuffled.slice(byesNeeded);
 
   const round1 = [];
-  for (let i = 0; i < 32; i += 2) {
-    round1.push({ a: slots[i], b: slots[i + 1], round: 1, matchId: `R1M${i / 2 + 1}` });
+  let mNum = 1;
+
+  for (const t of byeTeams) {
+    round1.push({ a: t, b: byeObj(), round: 1, matchId: `R1M${mNum++}` });
+  }
+  for (let i = 0; i < remaining.length; i += 2) {
+    round1.push({ a: remaining[i], b: remaining[i + 1], round: 1, matchId: `R1M${mNum++}` });
   }
 
   return {
@@ -295,97 +314,12 @@ function generateBracket32(teams) {
   };
 }
 
-function isBye(t) { return !!t?.isBye; }
-
-function renderBracket(tour) {
-  const el = $("bracket");
-  if (!tour) { el.textContent = "No bracket yet."; return; }
-  el.innerHTML = "";
-
-  for (let r = 0; r < tour.rounds.length; r++) {
-    const roundNum = r + 1;
-    const title = document.createElement("div");
-    title.className = "roundTitle";
-    title.textContent =
-      roundNum === 1 ? "Round of 32" :
-      roundNum === 2 ? "Round of 16" :
-      roundNum === 3 ? "Quarterfinals" :
-      roundNum === 4 ? "Semifinals" :
-      "Final";
-    el.appendChild(title);
-
-    for (const m of tour.rounds[r]) {
-      const line = document.createElement("div");
-      line.className = "matchLine";
-
-      const left = document.createElement("div");
-      left.textContent = m.a?.name ?? "—";
-
-      const vs = document.createElement("div");
-      vs.className = "vs";
-      vs.textContent = "VS";
-
-      const right = document.createElement("div");
-      right.style.textAlign = "right";
-      right.textContent = m.b?.name ?? "—";
-
-      line.appendChild(left);
-      line.appendChild(vs);
-      line.appendChild(right);
-
-      const small = document.createElement("div");
-      small.className = "small";
-      small.style.gridColumn = "1 / -1";
-
-      if (m.result) {
-        small.textContent = `${m.result.scoreA} - ${m.result.scoreB} • Winner: ${m.result.winner.name}`;
-      } else if (isBye(m.a) && !isBye(m.b)) {
-        small.textContent = `Auto-advance: ${m.b.name}`;
-      } else if (!isBye(m.a) && isBye(m.b)) {
-        small.textContent = `Auto-advance: ${m.a.name}`;
-      } else if (isBye(m.a) && isBye(m.b)) {
-        small.textContent = `BYE vs BYE (ignored)`;
-      } else {
-        small.textContent = `Pending`;
-      }
-
-      line.appendChild(small);
-      el.appendChild(line);
-    }
-  }
-}
-
-function setNextMatchText(tour) {
-  const el = $("nextMatch");
-  if (!tour) { el.textContent = "Generate a bracket to begin."; return; }
-
-  const roundArr = tour.rounds[tour.currentRound - 1];
-  if (!roundArr) { el.textContent = "Tournament complete."; return; }
-
-  while (tour.currentMatchIndex < roundArr.length) {
-    const m = roundArr[tour.currentMatchIndex];
-
-    if (m.result) { tour.currentMatchIndex++; continue; }
-
-    if (isBye(m.a) && !isBye(m.b)) {
-      resolveMatchResult(tour, m, { winner: m.b, loser: m.a, scoreA: 0, scoreB: 0, skipped: true, isAuto: true });
-      tour.currentMatchIndex++; continue;
-    }
-    if (!isBye(m.a) && isBye(m.b)) {
-      resolveMatchResult(tour, m, { winner: m.a, loser: m.b, scoreA: 0, scoreB: 0, skipped: true, isAuto: true });
-      tour.currentMatchIndex++; continue;
-    }
-    if (isBye(m.a) && isBye(m.b)) {
-      resolveMatchResult(tour, m, { winner: m.a, loser: m.b, scoreA: 0, scoreB: 0, skipped: true, isAuto: true });
-      tour.currentMatchIndex++; continue;
-    }
-
-    el.textContent = `Round ${m.round}: ${m.a.name} vs ${m.b.name}`;
-    return;
-  }
-
-  buildNextRoundIfNeeded(tour);
-  setNextMatchText(tour);
+function roundLabel(roundNum) {
+  return roundNum === 1 ? "Round of 32" :
+         roundNum === 2 ? "Round of 16" :
+         roundNum === 3 ? "Quarterfinals" :
+         roundNum === 4 ? "Semifinals" :
+         "Final";
 }
 
 function buildNextRoundIfNeeded(tour) {
@@ -442,6 +376,140 @@ function resolveMatchResult(tour, match, payload) {
   if (!isAuto) considerBiggestLoser(tour, loser, match.round);
 
   tour.history.push(match);
+}
+
+function renderTeamCell(team, side, result) {
+  const cell = document.createElement("div");
+  cell.className = `teamCell ${side}`;
+
+  if (team && !isBye(team) && team.iconImg) {
+    const icon = document.createElement("img");
+    icon.className = "teamIcon";
+    icon.src = team.iconImg;
+    icon.alt = `${team.name} icon`;
+    icon.onerror = () => icon.remove();
+    cell.appendChild(icon);
+  }
+
+  const name = document.createElement("div");
+  name.className = "teamNameText";
+
+  if (!team) name.textContent = "—";
+  else if (isBye(team)) { name.textContent = "BYE"; name.classList.add("bye"); }
+  else name.textContent = team.name;
+
+  if (result && team && !isBye(team)) {
+    if (result.winner?.id === team.id) name.classList.add("win");
+    if (result.loser?.id === team.id) name.classList.add("lose");
+  }
+
+  cell.appendChild(name);
+  return cell;
+}
+
+function renderBracket(tour) {
+  const el = $("bracket");
+  if (!tour) { el.textContent = "No bracket yet."; return; }
+  el.innerHTML = "";
+
+  for (let r = 0; r < tour.rounds.length; r++) {
+    const roundNum = r + 1;
+    const matches = tour.rounds[r];
+
+    const section = document.createElement("div");
+    section.className = "roundSection";
+    if (roundNum < tour.currentRound) section.classList.add("collapsed");
+
+    const header = document.createElement("div");
+    header.className = "roundHeader";
+
+    const left = document.createElement("div");
+    left.textContent = roundLabel(roundNum);
+
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = (roundNum < tour.currentRound) ? "finished (click to expand)" : "click to collapse";
+
+    header.appendChild(left);
+    header.appendChild(meta);
+
+    header.addEventListener("click", () => {
+      section.classList.toggle("collapsed");
+    });
+
+    const body = document.createElement("div");
+    body.className = "roundBody";
+
+    for (const m of matches) {
+      const line = document.createElement("div");
+      line.className = "matchLine";
+
+      const leftTeam = renderTeamCell(m.a, "left", m.result);
+      const vs = document.createElement("div");
+      vs.className = "vs";
+      vs.textContent = "VS";
+      const rightTeam = renderTeamCell(m.b, "right", m.result);
+
+      line.appendChild(leftTeam);
+      line.appendChild(vs);
+      line.appendChild(rightTeam);
+
+      const small = document.createElement("div");
+      small.className = "small";
+
+      if (m.result) {
+        if (m.result.isAuto) {
+          small.textContent = `Auto-advance: ${m.result.winner?.name ?? "—"}`;
+        } else {
+          small.textContent = `${m.result.scoreA} - ${m.result.scoreB} • Winner: ${m.result.winner.name}`;
+        }
+      } else if (!isBye(m.a) && isBye(m.b)) {
+        small.textContent = `Auto-advance: ${m.a.name}`;
+      } else if (isBye(m.a) && !isBye(m.b)) {
+        small.textContent = `Auto-advance: ${m.b.name}`;
+      } else {
+        small.textContent = "Pending";
+      }
+
+      line.appendChild(small);
+      body.appendChild(line);
+    }
+
+    section.appendChild(header);
+    section.appendChild(body);
+    el.appendChild(section);
+  }
+}
+
+function setNextMatchText(tour) {
+  const el = $("nextMatch");
+  if (!tour) { el.textContent = "Generate a bracket to begin."; return; }
+
+  const roundArr = tour.rounds[tour.currentRound - 1];
+  if (!roundArr) { el.textContent = "Tournament complete."; return; }
+
+  while (tour.currentMatchIndex < roundArr.length) {
+    const m = roundArr[tour.currentMatchIndex];
+
+    if (m.result) { tour.currentMatchIndex++; continue; }
+
+    // auto-advance: real team beats BYE
+    if (!isBye(m.a) && isBye(m.b)) {
+      resolveMatchResult(tour, m, { winner: m.a, loser: m.b, scoreA: 0, scoreB: 0, skipped: true, isAuto: true });
+      tour.currentMatchIndex++; continue;
+    }
+    if (isBye(m.a) && !isBye(m.b)) {
+      resolveMatchResult(tour, m, { winner: m.b, loser: m.a, scoreA: 0, scoreB: 0, skipped: true, isAuto: true });
+      tour.currentMatchIndex++; continue;
+    }
+
+    el.textContent = `Round ${m.round}: ${m.a.name} vs ${m.b.name}`;
+    return;
+  }
+
+  buildNextRoundIfNeeded(tour);
+  renderBracket(tour);
+  setNextMatchText(tour);
 }
 
 // ==========================
@@ -677,13 +745,14 @@ function playNextTournamentMatch() {
   }
 
   startMatch(m.a, m.b, {
-    title: `Tournament — Round ${m.round}`,
+    title: `Tournament — ${roundLabel(m.round)}`,
     continueLabel: "Continue Tournament",
     onComplete: (res) => {
       let winner, loser;
+
       if (res.scoreA === res.scoreB) {
         winner = Math.random() < 0.5 ? m.a : m.b;
-        loser  = winner.id === m.a.id ? m.b : m.a;
+        loser  = (winner.id === m.a.id) ? m.b : m.a;
       } else if (res.scoreA > res.scoreB) {
         winner = m.a; loser = m.b;
       } else {
@@ -731,7 +800,7 @@ function showTournamentResults() {
     const bl = tour.awards.biggestLoser;
     body.appendChild(resultItem(
       "Biggest Loser (Earliest Knockout w/ Highest Overall)",
-      `${bl.team.name} (Overall ${overallScore(bl.team)}) — eliminated in Round ${bl.roundEliminated}`
+      `${bl.team.name} (Overall ${overallScore(bl.team)}) — eliminated in ${roundLabel(bl.roundEliminated)}`
     ));
   } else {
     body.appendChild(resultItem("Biggest Loser (Earliest Knockout w/ Highest Overall)", "—"));
