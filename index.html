@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pit Ballers</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="title">Pit Ballers</div>
+      <div class="subtitle">Arcade text-sim basketball</div>
+    </div>
+    <div class="top-actions">
+      <button id="btnHome" class="ghost">Home</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <!-- HOME -->
+    <section id="viewHome" class="view">
+      <div class="card">
+        <h2>Choose a mode</h2>
+        <div class="row">
+          <button id="goH2H" class="primary">Head-to-Head</button>
+          <button id="goTour" class="primary">Tournament</button>
+        </div>
+        <p class="hint">Tip: use ← → to browse cards.</p>
+      </div>
+
+      <div class="card">
+        <h3>Team Browser</h3>
+        <div id="browserCarousel" class="carousel"></div>
+      </div>
+    </section>
+
+    <!-- H2H SETUP -->
+    <section id="viewH2H" class="view hidden">
+      <div class="card">
+        <h2>Head-to-Head</h2>
+        <div class="grid2">
+          <div>
+            <h3>Team A</h3>
+            <div id="pickA" class="carousel"></div>
+            <div class="row">
+              <button id="setA" class="secondary">Set Team A</button>
+              <div id="chosenA" class="pill">Not set</div>
+            </div>
+          </div>
+          <div>
+            <h3>Team B</h3>
+            <div id="pickB" class="carousel"></div>
+            <div class="row">
+              <button id="setB" class="secondary">Set Team B</button>
+              <div id="chosenB" class="pill">Not set</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row spaced">
+          <button id="randH2H" class="ghost">Randomize</button>
+          <button id="startH2H" class="primary">Start Match</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOURNAMENT SETUP -->
+    <section id="viewTour" class="view hidden">
+      <div class="card">
+        <h2>Tournament</h2>
+        <div class="row spaced">
+          <button id="genTour" class="secondary">Generate Bracket</button>
+          <button id="startTour" class="primary">Start Tournament</button>
+        </div>
+        <p class="hint">32-slot bracket with 6 BYEs (because 32–26 = 6). Random seeding.</p>
+      </div>
+
+      <div class="card">
+        <h3>Bracket</h3>
+        <div id="bracket" class="bracket"></div>
+      </div>
+
+      <div class="card">
+        <h3>Next Match</h3>
+        <div id="nextMatch" class="nextMatch">Generate a bracket to begin.</div>
+        <div class="row spaced">
+          <button id="playNext" class="primary">Play Next Match</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- MATCH VIEW -->
+    <section id="viewMatch" class="view hidden">
+      <div class="card">
+        <h2 id="matchTitle">Match</h2>
+
+        <div class="scoreboard">
+          <div class="team">
+            <div id="mTeamA" class="teamName">Team A</div>
+            <div id="mScoreA" class="score">0</div>
+          </div>
+
+          <div class="center">
+            <div id="mClock" class="clock">30.0s</div>
+            <div class="row centerRow">
+              <button id="speed1" class="chip active">1×</button>
+              <button id="speed2" class="chip">2×</button>
+              <button id="speed4" class="chip">4×</button>
+              <button id="skip" class="danger">Skip</button>
+            </div>
+            <div id="lastEvent" class="hint">—</div>
+          </div>
+
+          <div class="team">
+            <div id="mTeamB" class="teamName">Team B</div>
+            <div id="mScoreB" class="score">0</div>
+          </div>
+        </div>
+
+        <div class="row spaced">
+          <button id="backAfterMatch" class="ghost hidden">Back</button>
+          <button id="continueAfterMatch" class="primary hidden">Continue</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULTS -->
+    <section id="viewResults" class="view hidden">
+      <div class="card">
+        <h2>Results</h2>
+        <div id="resultsBody" class="results"></div>
+        <div class="row spaced">
+          <button id="playAgain" class="primary">Play Again</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
