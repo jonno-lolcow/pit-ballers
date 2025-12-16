@@ -23,50 +23,50 @@
   <main class="wrap">
 
     <!-- HOME -->
-<section id="viewHome" class="view">
+    <section id="viewHome" class="view">
+      <div class="homeLayout">
 
-  <div class="homeLayout">
-    <!-- MAIN: Arcade selector + Carousel -->
-    <div class="card">
-      <h3 class="centerTitle">Team Browser</h3>
+        <!-- MAIN -->
+        <div class="card">
+          <h3 class="centerTitle">Team Browser</h3>
 
-      <!-- Arcade icon selector -->
-      <div id="arcadeSelector" class="arcadeSelector"></div>
+          <!-- Arcade icon selector -->
+          <div id="arcadeSelector" class="arcadeSelector"></div>
 
-      <!-- Big carousel -->
-      <div id="browserCarousel" class="carousel"></div>
-    </div>
+          <!-- Big carousel -->
+          <div id="browserCarousel" class="carousel browser"></div>
+        </div>
 
-    <!-- RIGHT PANEL: Mode selection -->
-    <aside class="card sidePanel">
-      <h2>Game Modes</h2>
+        <!-- RIGHT PANEL -->
+        <aside class="card sidePanel">
+          <h2>Game Modes</h2>
 
-      <button id="goH2H" class="primary full">Head-to-Head</button>
-      <button id="goTour" class="primary full">Tournament</button>
+          <button id="goH2H" class="primary full">Head-to-Head</button>
+          <button id="goTour" class="primary full">Tournament</button>
 
-      <div class="divider"></div>
+          <div class="divider"></div>
 
-      <p class="hint">Use ← → to browse cards. Or click an icon.</p>
-    </aside>
-  </div>
-
-</section>
-
+          <p class="hint">Use ← → to browse cards, or click an icon.</p>
+        </aside>
+      </div>
+    </section>
 
     <!-- H2H SETUP -->
     <section id="viewH2H" class="view hidden">
       <div class="card">
         <h2>Head-to-Head</h2>
+
         <div class="grid2">
           <div>
-            <div id="pickA" class="carousel"></div>
+            <div id="pickA" class="carousel picker"></div>
             <div class="row">
               <button id="setA" class="secondary">Set Team A</button>
               <div id="chosenA" class="pill">Not set</div>
             </div>
           </div>
+
           <div>
-            <div id="pickB" class="carousel"></div>
+            <div id="pickB" class="carousel picker"></div>
             <div class="row">
               <button id="setB" class="secondary">Set Team B</button>
               <div id="chosenB" class="pill">Not set</div>
@@ -81,15 +81,22 @@
       </div>
     </section>
 
-    <!-- TOURNAMENT SETUP -->
+    <!-- TOURNAMENT -->
     <section id="viewTour" class="view hidden">
       <div class="card">
         <h2>Tournament</h2>
-        <div class="row spaced">
+
+        <div id="tourControls" class="row spaced">
           <button id="genTour" class="secondary">Generate Bracket</button>
           <button id="startTour" class="primary">Start Tournament</button>
         </div>
-        <p class="hint">32-slot bracket with 6 BYEs (because 32–26 = 6). Random seeding.</p>
+
+        <div id="tourInProgressBar" class="row spaced hidden">
+          <div class="pill">Tournament in progress</div>
+          <button id="resetTour" class="ghost">Reset</button>
+        </div>
+
+        <p class="hint">32-slot bracket. 25 teams means 7 BYEs in Round 1 only. Round of 16 has no BYEs.</p>
       </div>
 
       <div class="card">
@@ -102,6 +109,17 @@
         <div id="nextMatch" class="nextMatch">Generate a bracket to begin.</div>
         <div class="row spaced">
           <button id="playNext" class="primary">Play Next Match</button>
+        </div>
+      </div>
+
+      <div id="winnerCard" class="card hidden">
+        <h2>Winners</h2>
+        <div class="winnerWrap">
+          <div class="winnerMeta">
+            <div id="winnerName" class="winnerName">—</div>
+            <div id="winnerOverall" class="hint">—</div>
+          </div>
+          <img id="winnerImg" class="winnerImg" alt="Winner card" />
         </div>
       </div>
     </section>
@@ -134,7 +152,6 @@
           </div>
         </div>
 
-        <!-- 960x960 team cards under scores -->
         <div class="matchCards">
           <div class="matchCard">
             <div id="mcNameA" class="cardHeading">—</div>
