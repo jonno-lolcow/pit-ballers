@@ -8,10 +8,13 @@
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">
+    <div class="top-left"></div>
+
+    <div class="brandCenter">
       <div class="title">Pit Ballers</div>
-      <div class="subtitle">Arcade text-sim basketball</div>
+      <div class="subtitle">a Yo Mama game (Good AI - not slop)</div>
     </div>
+
     <div class="top-actions">
       <button id="btnHome" class="ghost">Home</button>
     </div>
@@ -31,7 +34,7 @@
       </div>
 
       <div class="card">
-        <h3>Team Browser</h3>
+        <h3 class="centerTitle">Team Browser</h3>
         <div id="browserCarousel" class="carousel"></div>
       </div>
     </section>
@@ -42,7 +45,6 @@
         <h2>Head-to-Head</h2>
         <div class="grid2">
           <div>
-            <h3>Team A</h3>
             <div id="pickA" class="carousel"></div>
             <div class="row">
               <button id="setA" class="secondary">Set Team A</button>
@@ -50,7 +52,6 @@
             </div>
           </div>
           <div>
-            <h3>Team B</h3>
             <div id="pickB" class="carousel"></div>
             <div class="row">
               <button id="setB" class="secondary">Set Team B</button>
@@ -116,6 +117,21 @@
           <div class="team">
             <div id="mTeamB" class="teamName">Team B</div>
             <div id="mScoreB" class="score">0</div>
+          </div>
+        </div>
+
+        <!-- 960x960 team cards under scores -->
+        <div class="matchCards">
+          <div class="matchCard">
+            <div id="mcNameA" class="cardHeading">—</div>
+            <img id="mcImgA" alt="Team A card" />
+            <div id="mcOverallA" class="cardFooter">Overall Score: —</div>
+          </div>
+
+          <div class="matchCard">
+            <div id="mcNameB" class="cardHeading">—</div>
+            <img id="mcImgB" alt="Team B card" />
+            <div id="mcOverallB" class="cardFooter">Overall Score: —</div>
           </div>
         </div>
 
