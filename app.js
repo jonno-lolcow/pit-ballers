@@ -1,5 +1,5 @@
 // ==========================
-// Pit Ballers — v2 UI + 4 ratings
+// Pit Ballers — Full MVP+ (Arcade selector + right panel)
 // ==========================
 
 const TEAM_NAMES = [
@@ -43,6 +43,7 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
   cow: 50,
   money: 50,
   cardImg: `img/teams/${fileFromName(name)}.png`,
+  iconImg: `img/icons/${fileFromName(name)}.png`,
 }));
 
 function overallScore(team) {
@@ -69,12 +70,42 @@ function setView(name) {
   for (const v of views) $(v).classList.toggle("hidden", v !== name);
 }
 
-// --- Carousel (browser = 1920, picker = 960) ---
+// --- Arcade icon selector ---
+function renderArcadeSelector(containerEl, teams, onPick) {
+  containerEl.innerHTML = "";
+
+  teams.forEach((t, i) => {
+    const btn = document.createElement("div");
+    btn.className = "arcadeIcon";
+    btn.dataset.index = String(i);
+    btn.dataset.name = t.name;
+
+    const img = document.createElement("img");
+    img.src = t.iconImg;
+    img.alt = t.name;
+
+    img.onerror = () => {
+      img.remove();
+      btn.textContent = t.name.split(" ")[1]?.slice(0, 2)?.toUpperCase() ?? "PB";
+    };
+
+    btn.appendChild(img);
+    btn.addEventListener("click", () => onPick(i));
+
+    containerEl.appendChild(btn);
+  });
+}
+
+function setArcadeActive(containerEl, index) {
+  const icons = containerEl.querySelectorAll(".arcadeIcon");
+  icons.forEach(el => el.classList.remove("active"));
+  const active = containerEl.querySelector(`.arcadeIcon[data-index="${index}"]`);
+  if (active) active.classList.add("active");
+}
+
+// --- Carousel ---
 function createCarousel(containerEl, teams, initialIndex = 0, variant = "browser") {
   let idx = initialIndex;
-
-  containerEl.classList.toggle("browser", variant === "browser");
-  containerEl.classList.toggle("picker", variant === "picker");
 
   const left = document.createElement("button");
   left.className = "navBtn";
@@ -110,6 +141,12 @@ function createCarousel(containerEl, teams, initialIndex = 0, variant = "browser
     heading.textContent = t.name;
     img.src = t.cardImg;
     footer.textContent = `Overall Score: ${overallScore(t)}`;
+
+    // keep arcade selector highlight synced with browser carousel
+    if (variant === "browser") {
+      const arcadeEl = document.getElementById("arcadeSelector");
+      if (arcadeEl) setArcadeActive(arcadeEl, idx);
+    }
   }
 
   function prev() { idx = (idx - 1 + teams.length) % teams.length; render(); }
@@ -135,13 +172,12 @@ function createCarousel(containerEl, teams, initialIndex = 0, variant = "browser
   };
 }
 
-// --- Match simulation (overall + form RNG) ---
+// --- Match simulation (Overall + form RNG) ---
 function choose2or3() {
   return Math.random() < 0.7 ? 2 : 3;
 }
 
 function computeEffective(overall) {
-  // Base dominates; form is lighter
   const form = randInt(-10, 10);
   const effective = overall * 0.85 + (overall + form) * 0.15;
   return { form, effective };
@@ -241,8 +277,7 @@ function runMatchRealtime(teamA, teamB, opts) {
 function generateBracket32(teams) {
   const shuffled = shuffle(teams);
 
-  const slots = [];
-  for (const t of shuffled) slots.push(t);
+  const slots = [...shuffled];
   while (slots.length < 32) slots.push({ id: `bye${slots.length}`, name: "BYE", isBye: true });
 
   const round1 = [];
@@ -271,11 +306,12 @@ function renderBracket(tour) {
     const roundNum = r + 1;
     const title = document.createElement("div");
     title.className = "roundTitle";
-    title.textContent = roundNum === 1 ? "Round of 32" :
-                        roundNum === 2 ? "Round of 16" :
-                        roundNum === 3 ? "Quarterfinals" :
-                        roundNum === 4 ? "Semifinals" :
-                        "Final";
+    title.textContent =
+      roundNum === 1 ? "Round of 32" :
+      roundNum === 2 ? "Round of 16" :
+      roundNum === 3 ? "Quarterfinals" :
+      roundNum === 4 ? "Semifinals" :
+      "Final";
     el.appendChild(title);
 
     for (const m of tour.rounds[r]) {
@@ -423,10 +459,22 @@ let matchController = null;
 let pendingContinue = null;
 
 function init() {
+  // Home browser carousel
   browser = createCarousel($("browserCarousel"), TEAMS, 0, "browser");
+
+  // Arcade selector
+  const arcadeEl = $("arcadeSelector");
+  renderArcadeSelector(arcadeEl, TEAMS, (pickedIndex) => {
+    browser.setIndex(pickedIndex);
+    setArcadeActive(arcadeEl, pickedIndex);
+  });
+  setArcadeActive(arcadeEl, browser.getIndex());
+
+  // H2H carousels
   pickerA = createCarousel($("pickA"), TEAMS, 0, "picker");
   pickerB = createCarousel($("pickB"), TEAMS, 1, "picker");
 
+  // Navigation
   $("btnHome").addEventListener("click", () => goHome());
   $("goH2H").addEventListener("click", () => {
     currentMode = "H2H";
@@ -439,6 +487,7 @@ function init() {
     resetTournamentUI();
   });
 
+  // H2H selection
   $("setA").addEventListener("click", () => {
     chosenTeamA = pickerA.getTeam();
     $("chosenA").textContent = `${chosenTeamA.name} (Overall ${overallScore(chosenTeamA)})`;
@@ -473,6 +522,7 @@ function init() {
     });
   });
 
+  // Tournament
   $("genTour").addEventListener("click", () => {
     currentTour = generateBracket32(TEAMS);
     renderBracket(currentTour);
@@ -487,6 +537,7 @@ function init() {
 
   $("playNext").addEventListener("click", () => playNextTournamentMatch());
 
+  // Match controls
   $("speed1").addEventListener("click", () => setSpeedUI(1));
   $("speed2").addEventListener("click", () => setSpeedUI(2));
   $("speed4").addEventListener("click", () => setSpeedUI(4));
@@ -498,6 +549,7 @@ function init() {
   });
   $("continueAfterMatch").addEventListener("click", () => pendingContinue?.());
 
+  // Results
   $("playAgain").addEventListener("click", () => goHome());
 
   goHome();
