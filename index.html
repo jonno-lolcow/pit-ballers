@@ -23,21 +23,35 @@
   <main class="wrap">
 
     <!-- HOME -->
-    <section id="viewHome" class="view">
-      <div class="card">
-        <h2>Choose a mode</h2>
-        <div class="row">
-          <button id="goH2H" class="primary">Head-to-Head</button>
-          <button id="goTour" class="primary">Tournament</button>
-        </div>
-        <p class="hint">Tip: use ← → to browse cards.</p>
-      </div>
+<section id="viewHome" class="view">
 
-      <div class="card">
-        <h3 class="centerTitle">Team Browser</h3>
-        <div id="browserCarousel" class="carousel"></div>
-      </div>
-    </section>
+  <div class="homeLayout">
+    <!-- MAIN: Arcade selector + Carousel -->
+    <div class="card">
+      <h3 class="centerTitle">Team Browser</h3>
+
+      <!-- Arcade icon selector -->
+      <div id="arcadeSelector" class="arcadeSelector"></div>
+
+      <!-- Big carousel -->
+      <div id="browserCarousel" class="carousel"></div>
+    </div>
+
+    <!-- RIGHT PANEL: Mode selection -->
+    <aside class="card sidePanel">
+      <h2>Game Modes</h2>
+
+      <button id="goH2H" class="primary full">Head-to-Head</button>
+      <button id="goTour" class="primary full">Tournament</button>
+
+      <div class="divider"></div>
+
+      <p class="hint">Use ← → to browse cards. Or click an icon.</p>
+    </aside>
+  </div>
+
+</section>
+
 
     <!-- H2H SETUP -->
     <section id="viewH2H" class="view hidden">
