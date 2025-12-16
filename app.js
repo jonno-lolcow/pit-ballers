@@ -1,19 +1,16 @@
 // ==========================
-// Pit Ballers — Full MVP+
-// - Arcade selector + browser carousel
-// - H2H (no-scroll sizing handled via CSS)
-// - Tournament: 32-slot with 6 BYEs in Round 1 ONLY (never BYE vs BYE)
-// - Bracket: icons + winner green / loser red + auto-collapse finished rounds
+// Pit Ballers — Desktop MVP+
 // ==========================
 
 const TEAM_NAMES = [
   "Lolcow Balls",
   "Lolcow Pit",
-  "Lolcow Queens",
+  "Lolcow Queens (a)",
+  "Lolcow Queens (b)",
   "Lolcow Live (a)",
   "Lolcow Live (b)",
   "Lolcow Rebel",
-  "Lolcow Nerds",
+  "Lolcow Nerd",
   "Lolcow Babe",
   "Lolcow Reapers",
   "Lolcow Fire",
@@ -25,31 +22,44 @@ const TEAM_NAMES = [
   "Lolcow Rewind",
   "Lolcow Cafe",
   "Lolcow Nuts",
-  "Lolcow Cash",
-  "Lolcow Wild",
-  "Lolcow Mods",
-  "Lolcow Keem",
-  "Lolcow Losers",
-  "Lolcow Acorn",
-  "Lolcow Wings",
-  "Lolcow Bus",
+  "Lolcow Cash (a)",
+  "Lolcow Cash (b)",
+  "Lolcow Wild (a)",
+  "Lolcow Wild (b)",
+  "Lolcow Boss",
+  "Lolcow Alpha",
 ];
 
-function fileFromName(name) {
+function baseKeyFromName(name) {
   return name.replaceAll(" ", "_");
 }
 
-const TEAMS = TEAM_NAMES.map((name, idx) => ({
-  id: `t${String(idx + 1).padStart(2, "0")}`,
-  name,
-  // ratings (0-100). keep 50 for now.
-  funny: 50,
-  obs: 50,
-  cow: 50,
-  money: 50,
-  cardImg: `img/teams/${fileFromName(name)}.png`,
-  iconImg: `img/icons/${fileFromName(name)}.png`,
-}));
+// Avoid asset collisions when display names repeat (e.g. two "Lolcow Fire")
+function buildTeams(names) {
+  const counts = new Map();
+  return names.map((displayName, idx) => {
+    const base = baseKeyFromName(displayName);
+    const n = (counts.get(base) ?? 0) + 1;
+    counts.set(base, n);
+
+    // first occurrence uses base; repeats use base + "__<n>"
+    const assetKey = n === 1 ? base : `${base}__${n}`;
+
+    return {
+      id: `t${String(idx + 1).padStart(2, "0")}`,
+      name: displayName,
+      assetKey,
+      funny: 50,
+      obs: 50,
+      cow: 50,
+      money: 50,
+      cardImg: `img/teams/${assetKey}.png`,
+      iconImg: `img/icons/${assetKey}.png`,
+    };
+  });
+}
+
+const TEAMS = buildTeams(TEAM_NAMES);
 
 function overallScore(team) {
   const avg = (team.funny + team.obs + team.cow + team.money) / 4;
@@ -181,7 +191,6 @@ function choose2or3() {
 }
 
 function computeEffective(overall) {
-  // Base dominates; form is lighter
   const form = randInt(-10, 10);
   const effective = overall * 0.85 + (overall + form) * 0.15;
   return { form, effective };
@@ -281,16 +290,15 @@ function runMatchRealtime(teamA, teamB, opts) {
 function isBye(t) { return !!t?.isBye; }
 
 function generateBracket32(teams) {
-  // 26 teams -> 6 BYEs needed to fill 32
   const shuffled = shuffle(teams);
-  const byesNeeded = 32 - shuffled.length; // 6
+  const byesNeeded = 32 - shuffled.length; // for 25 teams => 7 BYEs
   const byeObj = () => ({
     id: `bye_${Math.random().toString(16).slice(2)}`,
     name: "BYE",
     isBye: true
   });
 
-  // First 6 teams get paired with a BYE (never BYE vs BYE)
+  // First N teams get paired with a BYE (ensures no BYE vs BYE)
   const byeTeams = shuffled.slice(0, byesNeeded);
   const remaining = shuffled.slice(byesNeeded);
 
@@ -311,6 +319,7 @@ function generateBracket32(teams) {
     history: [],
     winner: null,
     awards: { bigScorer: null, biggestLoser: null },
+    started: true,
   };
 }
 
@@ -503,7 +512,7 @@ function setNextMatchText(tour) {
       tour.currentMatchIndex++; continue;
     }
 
-    el.textContent = `Round ${m.round}: ${m.a.name} vs ${m.b.name}`;
+    el.textContent = `Next: ${roundLabel(m.round)} — ${m.a.name} vs ${m.b.name}`;
     return;
   }
 
@@ -527,10 +536,8 @@ let matchController = null;
 let pendingContinue = null;
 
 function init() {
-  // Home browser carousel
   browser = createCarousel($("browserCarousel"), TEAMS, 0, "browser");
 
-  // Arcade selector
   const arcadeEl = $("arcadeSelector");
   renderArcadeSelector(arcadeEl, TEAMS, (pickedIndex) => {
     browser.setIndex(pickedIndex);
@@ -538,11 +545,9 @@ function init() {
   });
   setArcadeActive(arcadeEl, browser.getIndex());
 
-  // H2H carousels
   pickerA = createCarousel($("pickA"), TEAMS, 0, "picker");
   pickerB = createCarousel($("pickB"), TEAMS, 1, "picker");
 
-  // Navigation
   $("btnHome").addEventListener("click", () => goHome());
   $("goH2H").addEventListener("click", () => {
     currentMode = "H2H";
@@ -552,10 +557,9 @@ function init() {
   $("goTour").addEventListener("click", () => {
     currentMode = "TOUR";
     setView("viewTour");
-    resetTournamentUI();
+    ensureTournamentUI();
   });
 
-  // H2H selection
   $("setA").addEventListener("click", () => {
     chosenTeamA = pickerA.getTeam();
     $("chosenA").textContent = `${chosenTeamA.name} (Overall ${overallScore(chosenTeamA)})`;
@@ -590,17 +594,28 @@ function init() {
     });
   });
 
-  // Tournament
+  // Tournament controls
   $("genTour").addEventListener("click", () => {
     currentTour = generateBracket32(TEAMS);
     renderBracket(currentTour);
     setNextMatchText(currentTour);
+    ensureTournamentUI();
   });
 
   $("startTour").addEventListener("click", () => {
     if (!currentTour) currentTour = generateBracket32(TEAMS);
     renderBracket(currentTour);
     setNextMatchText(currentTour);
+    ensureTournamentUI();
+  });
+
+  $("resetTour").addEventListener("click", () => {
+    currentTour = null;
+    $("winnerCard").classList.add("hidden");
+    $("playNext").classList.remove("hidden");
+    $("nextMatch").textContent = "Generate a bracket to begin.";
+    $("bracket").textContent = "";
+    ensureTournamentUI();
   });
 
   $("playNext").addEventListener("click", () => playNextTournamentMatch());
@@ -617,7 +632,6 @@ function init() {
   });
   $("continueAfterMatch").addEventListener("click", () => pendingContinue?.());
 
-  // Results
   $("playAgain").addEventListener("click", () => goHome());
 
   goHome();
@@ -635,9 +649,19 @@ function resetH2H() {
   $("chosenB").textContent = "Not set";
 }
 
-function resetTournamentUI() {
-  renderBracket(currentTour);
-  setNextMatchText(currentTour);
+function ensureTournamentUI() {
+  const hasTour = !!currentTour;
+  const finished = !!currentTour?.winner;
+
+  // Hide generate/start when in progress OR finished (until reset)
+  $("tourControls").classList.toggle("hidden", hasTour);
+  $("tourInProgressBar").classList.toggle("hidden", !hasTour);
+
+  // Play next hidden when finished
+  $("playNext").classList.toggle("hidden", finished);
+
+  // Winner card shown when finished
+  $("winnerCard").classList.toggle("hidden", !finished);
 }
 
 function setSpeedUI(speed) {
@@ -645,6 +669,14 @@ function setSpeedUI(speed) {
     $(id).classList.toggle("active", s === speed);
   }
   matchController?.setSpeed(speed);
+}
+
+function flashScorer(which) {
+  const el = which === "A" ? $("mTeamA") : $("mTeamB");
+  el.classList.remove("flash");
+  // force reflow so animation can retrigger rapidly
+  void el.offsetWidth;
+  el.classList.add("flash");
 }
 
 function hydrateMatchCards(teamA, teamB) {
@@ -687,6 +719,7 @@ function startMatch(teamA, teamB, opts) {
       if (lastEvent) {
         const who = lastEvent.scorer === "A" ? teamA.name : teamB.name;
         $("lastEvent").textContent = `${who} +${lastEvent.points}`;
+        flashScorer(lastEvent.scorer);
       }
     },
     onDone: (res) => {
@@ -721,9 +754,10 @@ function playNextTournamentMatch() {
   if (!currentTour) return;
 
   setNextMatchText(currentTour);
+  ensureTournamentUI();
 
   if (currentTour.winner) {
-    showTournamentResults();
+    showTournamentWinnerCard();
     return;
   }
 
@@ -740,7 +774,9 @@ function playNextTournamentMatch() {
   if (!m) {
     buildNextRoundIfNeeded(currentTour);
     setNextMatchText(currentTour);
-    if (currentTour.winner) showTournamentResults();
+    renderBracket(currentTour);
+    ensureTournamentUI();
+    if (currentTour.winner) showTournamentWinnerCard();
     return;
   }
 
@@ -774,39 +810,27 @@ function playNextTournamentMatch() {
       setNextMatchText(currentTour);
 
       setView("viewTour");
-      if (currentTour.winner) showTournamentResults();
+      ensureTournamentUI();
+
+      if (currentTour.winner) {
+        showTournamentWinnerCard();
+      }
     }
   });
 }
 
-function showTournamentResults() {
-  const tour = currentTour;
-  const body = $("resultsBody");
-  body.innerHTML = "";
+function showTournamentWinnerCard() {
+  if (!currentTour?.winner) return;
 
-  body.appendChild(resultItem("Tournament Winner", tour.winner?.name ?? "—"));
+  const w = currentTour.winner;
+  $("winnerName").textContent = w.name;
+  $("winnerOverall").textContent = `Overall Score: ${overallScore(w)}`;
+  $("winnerImg").src = w.cardImg;
 
-  if (tour.awards.bigScorer) {
-    const b = tour.awards.bigScorer;
-    body.appendChild(resultItem(
-      "Big Scorer (Largest Point Spread)",
-      `${b.teamA.name} ${b.scoreA} — ${b.scoreB} ${b.teamB.name} (Diff ${b.diff})`
-    ));
-  } else {
-    body.appendChild(resultItem("Big Scorer (Largest Point Spread)", "—"));
-  }
-
-  if (tour.awards.biggestLoser) {
-    const bl = tour.awards.biggestLoser;
-    body.appendChild(resultItem(
-      "Biggest Loser (Earliest Knockout w/ Highest Overall)",
-      `${bl.team.name} (Overall ${overallScore(bl.team)}) — eliminated in ${roundLabel(bl.roundEliminated)}`
-    ));
-  } else {
-    body.appendChild(resultItem("Biggest Loser (Earliest Knockout w/ Highest Overall)", "—"));
-  }
-
-  setView("viewResults");
+  $("winnerCard").classList.remove("hidden");
+  $("playNext").classList.add("hidden");
+  $("nextMatch").textContent = "Tournament complete.";
+  ensureTournamentUI();
 }
 
 function resultItem(k, v) {
