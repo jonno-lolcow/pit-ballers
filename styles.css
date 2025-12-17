@@ -168,6 +168,14 @@ button:disabled{ opacity:.45; cursor:not-allowed; transform:none; box-shadow:non
   top:78px;
   align-self:start;
 }
+
+/* Side panel: add spacing between the two support links */
+.sidePanel .panelLinks{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .sidePanel .stack{ display:flex; flex-direction:column; gap:12px; }
 
 .bigBtn{
