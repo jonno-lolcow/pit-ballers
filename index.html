@@ -107,13 +107,6 @@
             <div id="progressFill" class="progressFill" style="width:0%"></div>
           </div>
         </div>
-
-        <div class="row" id="tourTopControls">
-          <button id="genTour" class="secondary">Generate Bracket</button>
-          <button id="startTour" class="primary hidden">Start Tournament</button>
-        </div>
-
-        <p class="hint">32-slot bracket. 25 teams means 7 BYEs in Round 1 only. Round of 16 has no BYEs.</p>
       </div>
 
       <div class="tourLayout">
@@ -123,29 +116,30 @@
           <div id="bracket" class="bracket"></div>
         </div>
 
-        <!-- Right sidebar (sticky) -->
-        <aside class="card tourSidebar">
-          <h3>Next Match</h3>
-          <div id="nextMatch" class="nextMatch">Generate a bracket to begin.</div>
-
+      <!-- Right sidebar (sticky) -->
+      <aside class="card tourSidebar" id="tourSidebar">
+        <h3>Next Match</h3>
+      
+        <button id="genTour" class="secondary full">Generate Bracket</button>
+      
+        <div id="nextMatchWrap" class="hidden">
+          <div id="nextMatch" class="nextMatch"></div>
+      
           <div class="divider"></div>
-
+      
           <button id="playNext" class="primary full" disabled>Play Next Match</button>
           <button id="endTour" class="primary full hidden">End Tournament</button>
-
-          <div class="divider"></div>
-
-          <p class="hint">Tip: You can also use Skip during matches to auto-sim.</p>
-        </aside>
+        </div>
+      </aside>
       </div>
 
       <!-- Reset at very bottom -->
-      <div class="card">
-        <div class="row spaced">
-          <div class="hint">Need a fresh run?</div>
-          <button id="resetTour" class="ghost">Reset Tournament</button>
-        </div>
+    <div class="card">
+      <div class="row spaced">
+        <div></div>
+        <button id="resetTour" class="ghost">Reset Tournament</button>
       </div>
+    </div>
     </section>
 
     <!-- MATCH VIEW -->
