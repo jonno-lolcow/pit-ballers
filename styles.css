@@ -744,3 +744,15 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
 }
 .matchTopBar #backAfterMatch{ justify-self:start; }
 .matchTopBar #continueAfterMatch{ justify-self:end; }
+
+.h2hControls{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+#viewH2H .h2hControls button{
+  padding: 10px 16px;
+  border-radius: 12px;
+  min-width: 140px;
+}
