@@ -31,52 +31,50 @@
         </div>
 
         <aside class="card sidePanel">
-        <h2>Game Modes</h2>
-        <div class="stack">
-          <button id="goH2H" class="primary full bigBtn">Head-to-Head</button>
-          <button id="goTour" class="primary full bigBtn">Tournament</button>
-        </div>
-        
-        <div class="divider"></div>
-        
-        <h3 class="panelTitle">Audio</h3>
-        <button id="muteBtn" class="secondary full">Mute</button>
-        
-        <div class="divider"></div>
-        
-        <h3 class="panelTitle">Like the game? Support the Channel!</h3>
-        <a id="channelLink" class="linkBtn full" href="https://www.youtube.com/@LolcowPit/featured" target="_blank" rel="noopener">▶ Open Channel</a>
-        <a id="memberLink" class="linkBtn full" href="https://www.youtube.com/channel/UCBfepYQDfUytva8MpIFYJbQ/join" target="_blank" rel="noopener">⭐ Become a Member</a>
-        
-        <div class="divider"></div>
-        
-        <h3 class="panelTitle">Top Supporters</h3>
-        <div id="topSupporters" class="supporters">
-          <div>🐷 AshesToAshes - Paypig</div>
-          <div>🐷 Rastov - Paypig</div>
-          <div>🏆 ShellRock - Top Donator</div>
-          <div>Become a 🐷 or 👑 - get your name in the game!</div>
-        </div>
-      </aside>
+          <h2>Game Modes</h2>
+          <div class="stack">
+            <button id="goH2H" class="primary full bigBtn">Head-to-Head</button>
+            <button id="goTour" class="primary full bigBtn">Tournament</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <h3 class="panelTitle">Audio</h3>
+          <button id="muteBtn" class="secondary full">Mute</button>
+
+          <div class="divider"></div>
+
+          <h3 class="panelTitle">Like the game? Support the Channel!</h3>
+          <a id="channelLink" class="linkBtn full" href="https://www.youtube.com/@LolcowPit/featured" target="_blank" rel="noopener">▶ Open Channel</a>
+          <a id="memberLink" class="linkBtn full" href="https://www.youtube.com/channel/UCBfepYQDfUytva8MpIFYJbQ/join" target="_blank" rel="noopener">⭐ Become a Member</a>
+
+          <div class="divider"></div>
+
+          <h3 class="panelTitle">Top Supporters</h3>
+          <div id="topSupporters" class="supporters">
+            <div>🐷 AshesToAshes - Paypig</div>
+            <div>🐷 Rastov - Paypig</div>
+            <div>🏆 ShellRock - Top Donator</div>
+            <div>Become a 🐷 or 👑 - get your name in the game!</div>
+          </div>
+        </aside>
       </div>
     </section>
 
     <!-- H2H SETUP -->
     <section id="viewH2H" class="view hidden">
       <div class="card">
-     <div class="titleBar">
-  <div>
-      
-    </div>
-    <h2 class="titleBarTitle">Head-to-Head</h2>
-    <div class="h2hControls">
-      <button id="randH2H" class="secondary">Randomize</button>
-      <button id="startH2H" class="primary">Start Match</button>
-    </div>
-    </div>
-    
+        <div class="titleBar">
+          <div></div>
+          <h2 class="titleBarTitle">Head-to-Head</h2>
+          <div class="h2hControls">
+            <button id="randH2H" class="secondary">Randomize</button>
+            <button id="startH2H" class="primary">Start Match</button>
+          </div>
+        </div>
+
         <div class="divider"></div>
-    
+
         <div class="grid2">
           <div>
             <div id="pickA" class="carousel picker"></div>
@@ -96,7 +94,7 @@
           <h2 style="margin:0;">Tournament</h2>
           <div id="tourStagePill" class="pill">Not started</div>
         </div>
-      
+
         <div id="tourHeaderDetails">
           <div class="progressWrap">
             <div class="progressLabel">
@@ -109,7 +107,7 @@
           </div>
         </div>
       </div>
-      
+
       <div class="tourLayout">
         <!-- Main bracket column -->
         <div class="card">
@@ -117,41 +115,41 @@
           <div id="bracket" class="bracket"></div>
         </div>
 
-      <!-- Right sidebar (sticky) -->
-      <aside class="card tourSidebar" id="tourSidebar">
-        <h3>Next Match</h3>
-      
-        <button id="genTour" class="secondary full">Generate Bracket</button>
-      
-        <div id="nextMatchWrap" class="hidden">
-          <div id="nextMatch" class="nextMatch"></div>
-      
-          <div class="divider"></div>
-      
-          <button id="playNext" class="primary full" disabled>Play Next Match</button>
-          <button id="endTour" class="primary full hidden">End Tournament</button>
-        </div>
-      </aside>
+        <!-- Right sidebar (sticky) -->
+        <aside class="card tourSidebar" id="tourSidebar">
+          <h3>Next Match</h3>
+
+          <button id="genTour" class="secondary full">Generate Bracket</button>
+
+          <div id="nextMatchWrap" class="hidden">
+            <div id="nextMatch" class="nextMatch"></div>
+
+            <div class="divider"></div>
+
+            <button id="playNext" class="primary full" disabled>Play Next Match</button>
+            <button id="endTour" class="primary full hidden">End Tournament</button>
+          </div>
+        </aside>
       </div>
 
       <!-- Reset at very bottom -->
-    <div class="card">
-      <div class="row spaced">
-        <div></div>
-        <div class="divider"></div>
-        <button id="resetTour" class="ghost full">Reset Tournament</button>
+      <div class="card">
+        <div class="row spaced">
+          <div></div>
+          <div class="divider"></div>
+          <button id="resetTour" class="ghost full">Reset Tournament</button>
+        </div>
       </div>
-    </div>
     </section>
 
     <!-- MATCH VIEW -->
     <section id="viewMatch" class="view hidden">
       <div class="card">
-      <div class="matchTopBar">
-        <button id="backAfterMatch" class="ghost hidden">Back</button>
-        <h2 id="matchTitle" class="matchTitleCenter">Match</h2>
-        <button id="continueAfterMatch" class="primary hidden">Continue</button>
-      </div>
+        <div class="matchTopBar">
+          <button id="backAfterMatch" class="ghost hidden">Back</button>
+          <h2 id="matchTitle" class="matchTitleCenter">Match</h2>
+          <button id="continueAfterMatch" class="primary hidden">Continue</button>
+        </div>
 
         <div class="scoreboard">
           <div class="team">
@@ -190,56 +188,55 @@
       </div>
     </section>
 
-    <!-- WINNERS SCREEN -->
+    <!-- WINNERS SCREEN (CLEAN) -->
     <section id="viewWinners" class="view hidden">
       <div class="card winnersCard">
         <div id="confetti" class="confetti" aria-hidden="true"></div>
         <div id="fireworks" class="fireworks" aria-hidden="true"></div>
-        <div id="winnerRoute"></div>
 
-        <div class="row spaced">
-          <h2 style="margin:0;">Winners</h2>
+        <div class="winnersTop">
+          <div>
+            <div class="winnersKicker">Winners</div>
+            <div id="winnerName" class="winnerName">—</div>
+            <div id="winnerRating" class="winnerOverall">—</div>
+          </div>
           <div class="pill">Tournament Complete</div>
         </div>
 
-        <div class="winnerPro">
-          <div class="winnerLeft">
-            <div id="winnerName" class="winnerName">—</div>
-            <div id="winnerRating" class="winnerOverall">—</div>
-
-        <div class="winnerStats">
-          <div class="stat">
-            <div class="k">Route to the Final</div>
-            <div id="winnerRoute" class="v routeList">—</div>
-          </div>
-            
-            <div class="winnerStats">
-              <div class="stat">
-                <div class="k">Big Scorer (Largest Spread)</div>
-                <div id="bigScorer" class="v">—</div>
-              </div>
-              <div class="stat">
-                <div class="k">Biggest Loser</div>
-                <div id="bigLoser" class="v">—</div>
-              </div>
+        <div class="winnersGrid">
+          <!-- LEFT -->
+          <div class="winnersLeft">
+            <div class="stat">
+              <div class="k">Route to the Final</div>
+              <div id="winnerRoute" class="routeList">—</div>
             </div>
 
-            <div class="row">
+            <div class="stat">
+              <div class="k">Big Scorer</div>
+              <div id="bigScorer" class="v">—</div>
+            </div>
+
+            <div class="stat">
+              <div class="k">Biggest Loser</div>
+              <div id="bigLoser" class="v">—</div>
+            </div>
+
+            <div class="winnerActions">
               <button id="winnersHome" class="primary">Back to Home</button>
               <button id="winnersRestart" class="secondary">New Tournament</button>
             </div>
           </div>
 
-        <div class="winnerRight">
-          <div class="trophyWrap">
-            <img id="trophyImg" class="trophyImg" src="img/ui/trophy.png" alt="Trophy" />
-            <div class="trophyFallback" aria-hidden="true">🏆</div>
-          </div>
-        
-          <img id="winnerImg" class="winnerImg" alt="Winner card" />
-          <div id="winnerSponsor" class="sponsorLine"></div>
-        </div>
+          <!-- RIGHT -->
+          <div class="winnersRight">
+            <div class="trophyWrap">
+              <img id="trophyImg" class="trophyImg" src="img/ui/trophy.png" alt="Trophy" />
+              <div class="trophyFallback" aria-hidden="true">🏆</div>
+            </div>
 
+            <img id="winnerImg" class="winnerImg" alt="Winner card" />
+            <div id="winnerSponsor" class="sponsorLine"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -257,24 +254,24 @@
 
   </main>
 
-<!-- Firebase (compat) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <!-- Firebase (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyB23VXC2PvAMx9foZoa22ciyku7Dghf5jQ",          // <-- paste from that screen
-    authDomain: "pit-ballers.firebaseapp.com",
-    projectId: "pit-ballers",
-    storageBucket: "pit-ballers.appspot.com",
-    messagingSenderId: "10961796042",
-    appId: "1:10961796042:web:9dcc8d72c204abd7d4ed33"
-    // measurementId optional — ignore for Firestore
-  };
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB23VXC2PvAMx9foZoa22ciyku7Dghf5jQ",
+      authDomain: "pit-ballers.firebaseapp.com",
+      projectId: "pit-ballers",
+      storageBucket: "pit-ballers.appspot.com",
+      messagingSenderId: "10961796042",
+      appId: "1:10961796042:web:9dcc8d72c204abd7d4ed33"
+    };
 
-  firebase.initializeApp(firebaseConfig);
-  window.db = firebase.firestore();
-</script>
-<script src="app.js"></script>
+    firebase.initializeApp(firebaseConfig);
+    window.db = firebase.firestore();
+  </script>
+
+  <script src="app.js"></script>
 </body>
 </html>
