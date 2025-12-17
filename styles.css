@@ -182,17 +182,25 @@ button:disabled{ opacity:.45; cursor:not-allowed; transform:none; box-shadow:non
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:14px 16px;
-  border-radius:16px;
+
+  padding: 16px 18px;        /* more vertical breathing room */
+  line-height: 1.25;         /* fixes text squash */
+  min-height: 52px;          /* ensures consistent button height */
+
+
+  border-radius:14px;
   background: linear-gradient(180deg, #1f3b66, #162a47);
-  border:1px solid rgba(255,255,255,.20);
+  border:1px solid rgba(255,255,255,.2);
+
   color:#fff;
-  font-weight:700;
+  font-weight:600;
   text-decoration:none;
+
   cursor:pointer;
   user-select:none;
-  transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
+  transition: all .15s ease;
 }
+
 .linkBtn:hover{
   background: linear-gradient(180deg, #2c5ea8, #1f3b66);
   transform: translateY(-1px);
