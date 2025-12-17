@@ -688,3 +688,20 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
   line-height: 1;
 }
 
+.matchTopBar{
+  display:grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items:center;
+  gap:12px;
+  padding: 10px 12px;
+}
+
+.matchTitleCenter{
+  text-align:center;
+  font-weight:700;
+  font-size: 20px;
+  letter-spacing: 0.5px;
+}
+
+.matchTopBar #backAfterMatch{ justify-self:start; }
+.matchTopBar #continueAfterMatch{ justify-self:end; }
