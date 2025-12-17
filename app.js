@@ -668,20 +668,6 @@ function ensureTournamentButtons() {
   playNext.disabled = !hasBracket;
 }
 
-  gen.classList.add("hidden");
-
-  if (!currentTour.started && !currentTour.winner) {
-    start.classList.remove("hidden");
-    start.disabled = false;
-  } else {
-    start.classList.add("hidden");
-    start.disabled = true;
-  }
-
-  updateProgressUI(currentTour);
-  playNext.disabled = !currentTour.started;
-}
-
 // ==========================
 // UI State + Wiring
 // ==========================
