@@ -74,32 +74,6 @@ function overallScore(team) {
   return Number.isFinite(team?.skill) ? team.skill : (TEAM_SKILL[team?.name] ?? 50);
 }
 
-// Star mapping rules (with your examples)
-function scoreToStars(score) {
-  if (score >= 91) return 5;
-  if (score >= 90) return 4.5;
-
-  let stars = Math.round(((score / 20) * 2)) / 2; // nearest 0.5
-  if (score >= 51) stars = Math.max(stars, 3);    // 51 => 3
-  stars = Math.max(0, Math.min(5, stars));
-  return stars;
-}
-
-function ratingHtml(score, sponsorText) {
-  const stars = scoreToStars(score);
-  const pct = `${(stars / 5) * 100}%`;
-
-  return `
-    <div class="ratingRow" title="Score hidden: ${score}">
-      <div class="starWrap" style="--pct:${pct}">
-        <div class="starBack">★★★★★</div>
-        <div class="starFront">★★★★★</div>
-      </div>
-      <div class="sponsor">Sponsored by: ${sponsorText}</div>
-    </div>
-  `;
-}
-
 function teamFooterHtml(team) {
   const score = overallScore(team);
   return ratingHtml(score, team.sponsor ?? "Your Name Here");
