@@ -512,6 +512,8 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
   object-fit:cover;
 }
 
+.cardWrap img.isLoading { filter: blur(2px); opacity: 0.7; }
+
 /* Win/Lose end-of-match styling */
 .matchCard.winGlow{
   border-color: rgba(88,255,155,.65);
