@@ -231,5 +231,25 @@
   </main>
 
   <script src="app.js"></script>
+  <!-- Firebase (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+
+<script>
+  // Your Firebase config (from Firebase Console → Project settings → Your apps → Web app)
+  const firebaseConfig = {
+    apiKey: "…",
+    authDomain: "…",
+    projectId: "…",
+    storageBucket: "…",
+    messagingSenderId: "…",
+    appId: "…"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  window.db = firebase.firestore();
+</script>
+
+<script src="app.js"></script>  
 </body>
 </html>
