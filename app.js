@@ -99,6 +99,42 @@ function setView(name) {
   for (const v of views) $(v).classList.toggle("hidden", v !== name);
 }
 
+const IMG_CACHE = new Map();
+
+function preloadImage(src) {
+  if (IMG_CACHE.has(src)) return IMG_CACHE.get(src);
+
+  const p = new Promise((resolve) => {
+    const im = new Image();
+    im.decoding = "async";
+    im.loading = "eager";
+    im.src = src;
+
+    const done = async () => {
+      try { if (im.decode) await im.decode(); } catch {}
+      resolve(im);
+    };
+
+    if (im.complete) done();
+    else {
+      im.onload = done;
+      im.onerror = () => resolve(im);
+    }
+  });
+
+  IMG_CACHE.set(src, p);
+  return p;
+}
+
+async function preloadAllTeamAssets() {
+  const urls = [];
+  for (const t of TEAMS) {
+    urls.push(t.cardImg, t.iconImg);
+  }
+  await Promise.all(urls.map(preloadImage));
+}
+
+
 // --- Arcade selector ---
 function renderArcadeSelector(containerEl, teams, onPick) {
   containerEl.innerHTML = "";
@@ -160,7 +196,16 @@ function createCarousel(containerEl, teams, initialIndex = 0, variant = "browser
   function render() {
     const t = teams[idx];
     heading.textContent = t.name;
-    img.src = t.cardImg;
+    const targetSrc = t.cardImg;
+    img.dataset.src = targetSrc;
+    img.classList.add("isLoading");
+    
+    preloadImage(targetSrc).then(() => {
+      // if user already moved on, don’t overwrite
+      if (img.dataset.src !== targetSrc) return;
+      img.src = targetSrc;
+      img.classList.remove("isLoading");
+    });
     footer.innerHTML = teamFooterHtml(t);
 
     if (variant === "browser") {
@@ -554,6 +599,7 @@ let matchController = null;
 let pendingContinue = null;
 
 function init() {
+  preloadAllTeamAssets(); // warm cache ASAP
   // Home
   browser = createCarousel($("browserCarousel"), TEAMS, 0, "browser");
   renderArcadeSelector($("arcadeSelector"), TEAMS, (idx) => {
@@ -721,11 +767,11 @@ function applyWinLoseStyling(teamA, teamB, scoreA, scoreB) {
 
 function hydrateMatchCards(teamA, teamB) {
   $("mcNameA").textContent = teamA.name;
-  $("mcImgA").src = teamA.cardImg;
+  preloadImage(teamA.cardImg).then(() => { $("mcImgA").src = teamA.cardImg; });
   $("mcFooterA").innerHTML = teamFooterHtml(teamA);
 
   $("mcNameB").textContent = teamB.name;
-  $("mcImgB").src = teamB.cardImg;
+  preloadImage(teamB.cardImg).then(() => { $("mcImgB").src = teamB.cardImg; });
   $("mcFooterB").innerHTML = teamFooterHtml(teamB);
 
   resetMatchWinLoseStyling();
@@ -735,8 +781,8 @@ function startMatch(teamA, teamB, opts) {
   setView("viewMatch");
 
   $("matchTitle").textContent = opts.title ?? "Match";
-  $("mTeamA").textContent = teamA.name;
-  $("mTeamB").textContent = teamB.name;
+  preloadImage(teamA.cardImg).then(() => { $("mcImgA").src = teamA.cardImg; });
+  preloadImage(teamB.cardImg).then(() => { $("mcImgB").src = teamB.cardImg; });
   $("mScoreA").textContent = "0";
   $("mScoreB").textContent = "0";
   $("lastEvent").textContent = "—";
