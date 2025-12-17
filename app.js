@@ -58,7 +58,7 @@ const TEAM_NAMES = [
   "Lolcow Alpha",
 ];
 
-const UPSET_CHANCE = 0.05;      // 5%
+const UPSET_CHANCE = 0.085;      // 5%
 const UPSET_GAP_MIN = 10;       // only if skill diff > 10
 
 function shouldTriggerUpset(teamA, teamB) {
