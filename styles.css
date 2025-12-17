@@ -627,6 +627,21 @@ button:disabled{ opacity:.45; cursor:not-allowed; transform:none; box-shadow:non
 }
 .stat .v{ font-weight: 1000; }
 
+/* Winners header trophy */
+.winnersTop{
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.winnersTrophy{
+  width: 88px;              /* tweak size here */
+  height: auto;
+  flex-shrink: 0;
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
+}
+
+
 .winnerActions{
   display:flex;
   gap:12px;
