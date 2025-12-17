@@ -58,6 +58,15 @@ const TEAM_NAMES = [
   "Lolcow Alpha",
 ];
 
+const UPSET_CHANCE = 0.05;      // 5%
+const UPSET_GAP_MIN = 10;       // only if skill diff > 10
+
+function shouldTriggerUpset(teamA, teamB) {
+  const gap = Math.abs(overallScore(teamA) - overallScore(teamB));
+  if (gap <= UPSET_GAP_MIN) return false;
+  return Math.random() < UPSET_CHANCE;
+}
+
 function keyFromName(name) {
   return name.replaceAll(" ", "_");
 }
@@ -276,12 +285,27 @@ function buildScoringEvents() {
 function planMatch(teamA, teamB) {
   const oA = overallScore(teamA);
   const oB = overallScore(teamB);
+
   const A = computeEffective(oA);
   const B = computeEffective(oB);
 
   const events = buildScoringEvents();
+
+  // base probability from effective performance
   const denom = (A.effective + B.effective) || 1;
-  const pA = A.effective / denom;
+  let pA = A.effective / denom;
+
+  // --- Upset logic ---
+  const upset = shouldTriggerUpset(teamA, teamB);
+
+  // identify underdog by base skill
+  const underdogSide = (oA < oB) ? "A" : (oB < oA ? "B" : null);
+
+  if (upset && underdogSide) {
+    // flip the advantage toward the underdog (strong bias but not 100%)
+    // underdog gets ~65% of scoring events
+    pA = (underdogSide === "A") ? 0.65 : 0.35;
+  }
 
   const planned = events.map(e => ({
     ...e,
@@ -289,15 +313,16 @@ function planMatch(teamA, teamB) {
     points: choose2or3()
   }));
 
-  return { planned };
+  return { planned, upset, underdogSide };
 }
+
 
 function runMatchRealtime(teamA, teamB, opts) {
   const { onUpdate, onDone } = opts;
   const DURATION = 30000;
   let speed = 1;
 
-  const { planned } = planMatch(teamA, teamB);
+  const { planned, upset } = planMatch(teamA, teamB);
 
   let scoreA = 0, scoreB = 0, i = 0;
   let rafId = null, done = false, skipped = false;
@@ -813,6 +838,7 @@ function startMatch(teamA, teamB, opts) {
   if ($("mScoreA")) $("mScoreA").textContent = "0";
   if ($("mScoreB")) $("mScoreB").textContent = "0";
   if ($("lastEvent")) $("lastEvent").textContent = "—";
+  if (upset) $("lastEvent").textContent = "😱 Wow — What an upset!!!";
   if ($("mClock")) $("mClock").textContent = "30.0s";
 
   hydrateMatchCards(teamA, teamB);
@@ -840,10 +866,20 @@ function startMatch(teamA, teamB, opts) {
     onDone: (res) => {
       if ($("mScoreA")) $("mScoreA").textContent = String(res.scoreA);
       if ($("mScoreB")) $("mScoreB").textContent = String(res.scoreB);
-      if ($("mClock")) $("mClock").textContent = `0.0s`;
-      if ($("lastEvent")) $("lastEvent").textContent = res.skipped ? "Skipped to end." : "Final.";
-
+      if ($("mClock"))  $("mClock").textContent  = "0.0s";
+    
+      if (upset) {
+        $("lastEvent").textContent = res.skipped
+          ? "😱 Wow — What an upset!!! (Skipped)"
+          : "😱 Wow — What an upset!!!";
+      } else {
+        $("lastEvent").textContent = res.skipped
+          ? "Skipped to end."
+          : "Final.";
+      }
+    
       applyWinLoseStyling(teamA, teamB, res.scoreA, res.scoreB);
+    }
 
       const isFinalUI = opts.hideBackOnDone === true;
       const isH2H = (currentMode === "H2H") || (opts.title === "Head-to-Head");
