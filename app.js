@@ -61,6 +61,23 @@ const TEAM_NAMES = [
 const UPSET_CHANCE = 0.085;      // 5%
 const UPSET_GAP_MIN = 10;       // only if skill diff > 10
 
+async function hydrateSponsorsFromFirestore() {
+  try {
+    const snap = await window.db.collection("teams").get();
+    const byId = new Map();
+    snap.forEach(doc => byId.set(doc.id, doc.data()));
+
+    for (const t of TEAMS) {
+      const row = byId.get(t.id);
+      if (row?.sponsorName) t.sponsor = row.sponsorName;
+      if (row?.name) t.name = row.name; // optional, but helps keep in sync
+    }
+  } catch (e) {
+    console.warn("Sponsor load failed (using defaults):", e);
+  }
+}
+
+
 function shouldTriggerUpset(teamA, teamB) {
   const gap = Math.abs(overallScore(teamA) - overallScore(teamB));
   if (gap <= UPSET_GAP_MIN) return false;
