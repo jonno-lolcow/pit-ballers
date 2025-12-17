@@ -959,7 +959,11 @@ function showWinnersScreen() {
   $("winnerName").textContent = tour.winner.name;
 
   const wScore = overallScore(tour.winner);
-  $("winnerRating").innerHTML = ratingHtml(wScore, tour.winner.sponsor ?? "Your Name Here");
+$("winnerRating").innerHTML = `
+  <div class="sponsorOnly large">
+    Sponsored by: ${tour.winner.sponsor ?? "Your Name Here"}
+  </div>
+`;
   $("winnerImg").src = tour.winner.cardImg;
   $("winnerSponsor").textContent = `Sponsored by: ${tour.winner.sponsor ?? "Your Name Here"}`;
 
