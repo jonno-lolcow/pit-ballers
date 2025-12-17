@@ -1,6 +1,33 @@
 // ==========================
 // Pit Ballers — Full JS (updated: Final -> Next -> Winners + Trophy + Fireworks)
 // ==========================
+const TEAM_SKILL = {
+  "Lolcow Balls": 50,
+  "Lolcow Pit": 50,
+  "Lolcow Queens (a)": 50,
+  "Lolcow Queens (b)": 50,
+  "Lolcow Live (a)": 50,
+  "Lolcow Live (b)": 50,
+  "Lolcow Rebel": 50,
+  "Lolcow Nerd": 50,
+  "Lolcow Babe": 50,
+  "Lolcow Reapers": 50,
+  "Lolcow Fire": 50,
+  "Lolcow Rain": 50,
+  "Lolcow Crypt": 50,
+  "Lolcow Chubby": 50,
+  "Lolcow Aussy": 50,
+  "Lolcow Test": 50,
+  "Lolcow Rewind": 50,
+  "Lolcow Cafe": 50,
+  "Lolcow Nuts": 50,
+  "Lolcow Cash (a)": 50,
+  "Lolcow Cash (b)": 50,
+  "Lolcow Wild (a)": 50,
+  "Lolcow Wild (b)": 50,
+  "Lolcow Boss": 50,
+  "Lolcow Alpha": 50,
+};
 
 const TEAM_NAMES = [
   "Lolcow Balls",
@@ -37,19 +64,15 @@ function keyFromName(name) {
 const TEAMS = TEAM_NAMES.map((name, idx) => ({
   id: `t${String(idx + 1).padStart(2, "0")}`,
   name,
-  funny: 50,
-  obs: 50,
-  cow: 50,
-  money: 50,
   sponsor: "Your Name Here",
   cardImg: `img/teams/${keyFromName(name)}.png`,
   iconImg: `img/icons/${keyFromName(name)}.png`,
 }));
 
 function overallScore(team) {
-  const avg = (team.funny + team.obs + team.cow + team.money) / 4;
-  return Math.round(avg);
+  return team.skill;
 }
+
 
 // Star mapping rules (with your examples)
 function scoreToStars(score) {
@@ -194,11 +217,15 @@ function createCarousel(containerEl, teams, initialIndex = 0, variant = "browser
 
 // --- Match simulation ---
 function choose2or3() { return Math.random() < 0.7 ? 2 : 3; }
-function computeEffective(overall) {
-  const form = randInt(-10, 10);
-  const effective = overall * 0.85 + (overall + form) * 0.15;
-  return { form, effective };
+function computeEffective(skill) {
+  const performance = randInt(-20, 20); // form / RNG
+  const effective =
+    (skill * 0.6) +
+    ((skill + performance) * 0.4);
+
+  return { performance, effective };
 }
+
 function buildScoringEvents() {
   const eventCount = randInt(18, 34);
   const times = [];
