@@ -1,5 +1,5 @@
 // ==========================
-// Pit Ballers — Final UX + Stars + Sponsors
+// Pit Ballers — Full JS (updated: Final -> Next -> Winners + Trophy + Fireworks)
 // ==========================
 
 const TEAM_NAMES = [
@@ -309,7 +309,7 @@ function generateBracket32(teams) {
     awards:{ bigScorer:null, biggestLoser:null },
     bracketGenerated:true,
     started:false,
-    finalReadyToEnd:false, // after final is played
+    finalReadyToEnd:false,
   };
 }
 
@@ -452,11 +452,6 @@ function setNextMatchText(tour) {
   const el = $("nextMatch");
   if (!tour) { el.textContent = "Generate a bracket to begin."; return; }
 
-  if (tour.finalReadyToEnd) {
-    el.textContent = "Final complete — click End Tournament";
-    return;
-  }
-
   const roundArr = tour.rounds[tour.currentRound - 1];
   if (!roundArr) { el.textContent = "Tournament complete."; return; }
 
@@ -508,40 +503,9 @@ function updateProgressUI(tour) {
   fill.style.width = `${pct}%`;
   txt.textContent = `${pct}%`;
 
-  if (tour.finalReadyToEnd) pill.textContent = "Final complete";
-  else if (tour.winner) pill.textContent = "Complete";
+  if (tour.winner) pill.textContent = "Final complete";
   else if (tour.started) pill.textContent = `In progress — ${roundLabel(tour.currentRound)}`;
   else pill.textContent = "Bracket ready";
-}
-
-function updateTourSidebarButtons() {
-  const play = $("playNext");
-  const end = $("endTour");
-
-  if (!currentTour) {
-    play.disabled = true;
-    play.classList.remove("hidden");
-    end.classList.add("hidden");
-    return;
-  }
-
-  if (currentTour.finalReadyToEnd) {
-    play.classList.add("hidden");
-    end.classList.remove("hidden");
-    end.disabled = false;
-    return;
-  }
-
-  end.classList.add("hidden");
-  play.classList.remove("hidden");
-
-  if (!currentTour.started) {
-    play.disabled = true;
-    return;
-  }
-
-  // If winner already computed, we still force End flow rather than Play Next
-  play.disabled = !!currentTour.winner;
 }
 
 function ensureTournamentButtons() {
@@ -553,13 +517,13 @@ function ensureTournamentButtons() {
     start.classList.add("hidden");
     start.disabled = true;
     updateProgressUI(null);
-    updateTourSidebarButtons();
+    $("playNext").disabled = true;
     return;
   }
 
   gen.classList.add("hidden");
 
-  if (!currentTour.started && !currentTour.winner && !currentTour.finalReadyToEnd) {
+  if (!currentTour.started && !currentTour.winner) {
     start.classList.remove("hidden");
     start.disabled = false;
   } else {
@@ -568,7 +532,7 @@ function ensureTournamentButtons() {
   }
 
   updateProgressUI(currentTour);
-  updateTourSidebarButtons();
+  $("playNext").disabled = !currentTour.started;
 }
 
 // ==========================
@@ -642,7 +606,7 @@ function init() {
       title: "Head-to-Head",
       onComplete: (result) => showResultsH2H(chosenTeamA, chosenTeamB, result),
       continueLabel: "View Results",
-      postStyle: true,
+      hideBackOnDone: false,
     });
   });
 
@@ -659,14 +623,10 @@ function init() {
     currentTour.started = true;
     setNextMatchText(currentTour);
     ensureTournamentButtons();
+    $("playNext").disabled = false;
   });
 
   $("playNext").addEventListener("click", () => playNextTournamentMatch());
-
-  $("endTour").addEventListener("click", () => {
-    // End Tournament button routes to Winners + celebration
-    showWinnersScreen();
-  });
 
   $("resetTour").addEventListener("click", () => {
     currentTour = null;
@@ -700,6 +660,9 @@ function init() {
 
   // H2H results
   $("playAgain").addEventListener("click", () => goHome());
+
+  // Trophy fallback (if trophy png missing)
+  ensureTrophyFallback();
 
   goHome();
 }
@@ -737,7 +700,7 @@ function resetMatchWinLoseStyling() {
 function applyWinLoseStyling(teamA, teamB, scoreA, scoreB) {
   resetMatchWinLoseStyling();
 
-  let winnerSide = null; // "A"|"B"
+  let winnerSide = null;
   if (scoreA === scoreB) winnerSide = (Math.random() < 0.5 ? "A" : "B");
   else winnerSide = (scoreA > scoreB ? "A" : "B");
 
@@ -803,11 +766,11 @@ function startMatch(teamA, teamB, opts) {
       $("mClock").textContent = `0.0s`;
       $("lastEvent").textContent = res.skipped ? "Skipped to end." : "Final.";
 
-      // apply win/lose visual styling
       applyWinLoseStyling(teamA, teamB, res.scoreA, res.scoreB);
 
       $("continueAfterMatch").classList.remove("hidden");
-      $("backAfterMatch").classList.remove("hidden");
+      if (opts.hideBackOnDone) $("backAfterMatch").classList.add("hidden");
+      else $("backAfterMatch").classList.remove("hidden");
 
       pendingContinue = () => opts.onComplete?.(res);
       $("continueAfterMatch").textContent = opts.continueLabel ?? "Continue";
@@ -829,12 +792,11 @@ function showResultsH2H(teamA, teamB, result) {
 }
 
 function playNextTournamentMatch() {
-  if (!currentTour || !currentTour.started || currentTour.finalReadyToEnd) return;
+  if (!currentTour || !currentTour.started || currentTour.winner) return;
 
   setNextMatchText(currentTour);
   renderBracket(currentTour);
   updateProgressUI(currentTour);
-  updateTourSidebarButtons();
 
   const roundArr = currentTour.rounds[currentTour.currentRound - 1];
   if (!roundArr) return;
@@ -851,15 +813,6 @@ function playNextTournamentMatch() {
     setNextMatchText(currentTour);
     renderBracket(currentTour);
     updateProgressUI(currentTour);
-
-    // if final is already resolved, switch to end flow
-    if (currentTour.winner) {
-      currentTour.finalReadyToEnd = true;
-      setNextMatchText(currentTour);
-      ensureTournamentButtons();
-      return;
-    }
-
     return;
   }
 
@@ -867,7 +820,8 @@ function playNextTournamentMatch() {
 
   startMatch(m.a, m.b, {
     title: `Tournament — ${roundLabel(m.round)}`,
-    continueLabel: "Continue Tournament",
+    continueLabel: isFinalMatch ? "Next" : "Continue Tournament",
+    hideBackOnDone: isFinalMatch,
     onComplete: (res) => {
       let winner, loser;
 
@@ -892,26 +846,22 @@ function playNextTournamentMatch() {
       currentTour.currentMatchIndex++;
       buildNextRoundIfNeeded(currentTour);
 
-      renderBracket(currentTour);
-      setNextMatchText(currentTour);
-      updateProgressUI(currentTour);
-
-      setView("viewTour");
-
-      // If that was the final, don't auto-show winners.
+      // Final finished -> Winners screen
       if (isFinalMatch && currentTour.winner) {
-        currentTour.finalReadyToEnd = true;
-        setNextMatchText(currentTour);
-        ensureTournamentButtons();
+        showWinnersScreen();
         return;
       }
 
+      renderBracket(currentTour);
+      setNextMatchText(currentTour);
+      updateProgressUI(currentTour);
       ensureTournamentButtons();
+      setView("viewTour");
     }
   });
 }
 
-// Confetti burst for winners screen
+// Confetti burst
 function confettiBurst() {
   const box = $("confetti");
   if (!box) return;
@@ -940,8 +890,54 @@ function confettiBurst() {
     box.appendChild(d);
   }
 
-  // clear after animation
   setTimeout(() => { box.innerHTML = ""; }, 2600);
+}
+
+// Fireworks burst (simple sparks)
+function fireworksBurst(bursts = 3) {
+  const box = $("fireworks");
+  if (!box) return;
+
+  box.innerHTML = "";
+  const colors = ["#4ea1ff","#58ff9b","#ff4e6a","#ffd24e","#b57bff","#ffffff"];
+
+  for (let b = 0; b < bursts; b++) {
+    const cx = 20 + Math.random() * 60;
+    const cy = 15 + Math.random() * 35;
+    const sparks = 26 + Math.floor(Math.random() * 18);
+
+    for (let i = 0; i < sparks; i++) {
+      const s = document.createElement("div");
+      s.className = "spark";
+      s.style.left = `${cx}%`;
+      s.style.top  = `${cy}%`;
+      s.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+      const ang = Math.random() * Math.PI * 2;
+      const dist = 90 + Math.random() * 180;
+      const dx = Math.cos(ang) * dist;
+      const dy = Math.sin(ang) * dist;
+
+      s.style.setProperty("--dx", `${dx}px`);
+      s.style.setProperty("--dy", `${dy}px`);
+      s.style.animationDelay = `${b * 160 + Math.random() * 120}ms`;
+
+      box.appendChild(s);
+    }
+  }
+
+  setTimeout(() => { box.innerHTML = ""; }, 1400);
+}
+
+// Trophy image fallback (if trophy png missing)
+function ensureTrophyFallback() {
+  const img = $("trophyImg");
+  const fb = document.querySelector(".trophyFallback");
+  if (!img || !fb) return;
+  img.onerror = () => {
+    img.style.display = "none";
+    fb.style.opacity = "1";
+  };
 }
 
 function showWinnersScreen() {
@@ -971,6 +967,7 @@ function showWinnersScreen() {
 
   setView("viewWinners");
   confettiBurst();
+  fireworksBurst(4);
 }
 
 function resultItem(k, v) {
