@@ -148,6 +148,36 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
   align-self:start;
 }
 
+.sidePanel .stack{ display:flex; flex-direction:column; gap:12px; }
+
+.bigBtn{
+  padding:14px 14px;
+  font-size:16px;
+  border-radius:14px;
+}
+
+.panelTitle{
+  margin:10px 0 8px;
+  opacity:.9;
+}
+
+.linkBtn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:12px 14px;
+  border-radius:14px;
+  text-decoration:none;
+  border:1px solid rgba(255,255,255,.12);
+}
+.linkBtn.full{ width:100%; }
+
+.supporters{
+  font-size:14px;
+  line-height:1.5;
+  opacity:.9;
+}
+
 /* Arcade selector */
 .arcadeSelector{
   display:grid;
