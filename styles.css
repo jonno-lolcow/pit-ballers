@@ -286,6 +286,14 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
   background:rgba(0,0,0,.12);
 }
 
+/* Bigger sponsor labels everywhere */
+.sponsor,
+.sponsorLine {
+  font-size: 1.5em;     /* ~50% bigger */
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
 /* Head-to-Head */
 .grid2{
   display:grid;
