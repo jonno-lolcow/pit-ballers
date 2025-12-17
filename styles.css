@@ -249,7 +249,7 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
   object-fit:cover;
 }
 
-/* Star rating + sponsor */
+/* (Star rating CSS can stay even if you removed it from HTML — harmless) */
 .ratingRow{
   display:flex;
   justify-content:center;
@@ -289,7 +289,7 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
 /* Bigger sponsor labels everywhere */
 .sponsor,
 .sponsorLine {
-  font-size: 1.5em;     /* ~50% bigger */
+  font-size: 1.5em;
   font-weight: 700;
   letter-spacing: 0.2px;
 }
@@ -524,14 +524,58 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
   opacity: .72;
 }
 
-/* Score flash */
-@keyframes scoreFlash {
-  0%   { background: rgba(88,255,155,.0); border-color: rgba(88,255,155,.0); }
-  25%  { background: rgba(88,255,155,.25); border-color: rgba(88,255,155,.65); }
-  60%  { background: rgba(88,255,155,.10); border-color: rgba(88,255,155,.35); }
-  100% { background: rgba(88,255,155,.0); border-color: rgba(88,255,155,.0); }
+/* =========================================================
+   SCORE FLASH — flash the WHOLE team tile
+   (works even with Team A/B labels hidden)
+   ========================================================= */
+@keyframes scoreFlashBox {
+  0%   { background: rgba(0,0,0,.12); border-color: var(--border); }
+  18%  { background: rgba(88,255,155,.22); border-color: rgba(88,255,155,.85); }
+  55%  { background: rgba(88,255,155,.10); border-color: rgba(88,255,155,.40); }
+  100% { background: rgba(0,0,0,.12); border-color: var(--border); }
 }
-.teamName.flash{ animation: scoreFlash 280ms ease-out; }
+
+/* If JS adds .flash to the number, also flash the parent .team */
+#viewMatch #mScoreA.flash { }
+#viewMatch #mScoreB.flash { }
+
+#viewMatch #mScoreA.flash,
+#viewMatch #mScoreB.flash{
+  /* keep the number readable, but the main flash is on the tile */
+  text-shadow: 0 0 10px rgba(88,255,155,.22);
+}
+
+/* main effect */
+#viewMatch .team.flash{
+  animation: scoreFlashBox 300ms ease-out;
+}
+
+/* (If you later choose to add .flash directly to #mScoreA/#mScoreB only,
+   you can swap to a score-level flash too.) */
+
+/* Results / misc */
+.results{ display:grid; gap:10px; }
+.resultItem{
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+  background:rgba(0,0,0,.12);
+}
+.resultItem .k{ color:var(--muted); font-size:12px; }
+.resultItem .v{ font-weight:1000; font-size:16px; margin-top:4px; }
+
+/* Hide Team A / Team B names in the score tiles */
+#viewMatch #mTeamA,
+#viewMatch #mTeamB {
+  display: none;
+}
+
+/* Make the live scores bigger */
+#viewMatch #mScoreA,
+#viewMatch #mScoreB {
+  font-size: clamp(48px, 6vw, 86px);
+  line-height: 1;
+}
 
 /* Winners screen */
 .winnersCard{ position:relative; overflow:hidden; }
@@ -613,7 +657,6 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
   opacity: 0.9;
   text-align: center;
 }
-
 .sponsorOnly.large {
   font-size: 1.2rem;
   font-weight: 600;
@@ -641,7 +684,6 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
   100% { transform: translate(var(--dx), var(--dy)) scale(.6); opacity:0; }
 }
 
-
 /* Confetti */
 .confetti{
   position:absolute;
@@ -664,30 +706,7 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
   100%{ transform: translateY(140vh) rotate(540deg); opacity: 0; }
 }
 
-/* Results */
-.results{ display:grid; gap:10px; }
-.resultItem{
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:12px;
-  background:rgba(0,0,0,.12);
-}
-.resultItem .k{ color:var(--muted); font-size:12px; }
-.resultItem .v{ font-weight:1000; font-size:16px; margin-top:4px; }
-
-/* Hide Team A / Team B names in the score tiles */
-#viewMatch #mTeamA,
-#viewMatch #mTeamB {
-  display: none;
-}
-
-/* Make the live scores bigger */
-#viewMatch #mScoreA,
-#viewMatch #mScoreB {
-  font-size: clamp(48px, 6vw, 86px);
-  line-height: 1;
-}
-
+/* Match top bar (if you’ve moved buttons up top) */
 .matchTopBar{
   display:grid;
   grid-template-columns: 1fr auto 1fr;
@@ -695,13 +714,11 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
   gap:12px;
   padding: 10px 12px;
 }
-
 .matchTitleCenter{
   text-align:center;
   font-weight:700;
   font-size: 20px;
   letter-spacing: 0.5px;
 }
-
 .matchTopBar #backAfterMatch{ justify-self:start; }
 .matchTopBar #continueAfterMatch{ justify-self:end; }
