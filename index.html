@@ -12,7 +12,6 @@
 
     <div class="brandCenter">
       <div class="title">Pit Ballers</div>
-      <div class="subtitle">a Yo Mama game (Good AI - not slop)</div>
     </div>
 
     <div class="top-actions">
@@ -133,11 +132,14 @@
     <!-- MATCH VIEW -->
     <section id="viewMatch" class="view hidden">
       <div class="card">
-        <h2 id="matchTitle">Match</h2>
+      <div class="matchTopBar">
+        <button id="backAfterMatch" class="ghost hidden">Back</button>
+        <h2 id="matchTitle" class="matchTitleCentered">Match</h2>
+        <button id="continueAfterMatch" class="primary hidden">Continue</button>
+      </div>
 
         <div class="scoreboard">
           <div class="team">
-            <div id="mTeamA" class="teamName">Team A</div>
             <div id="mScoreA" class="score">0</div>
           </div>
 
@@ -153,7 +155,6 @@
           </div>
 
           <div class="team">
-            <div id="mTeamB" class="teamName">Team B</div>
             <div id="mScoreB" class="score">0</div>
           </div>
         </div>
@@ -170,11 +171,6 @@
             <img id="mcImgB" alt="Team B card" />
             <div id="mcFooterB" class="cardFooter"></div>
           </div>
-        </div>
-
-        <div class="row spaced">
-          <button id="backAfterMatch" class="ghost hidden">Back</button>
-          <button id="continueAfterMatch" class="primary hidden">Continue</button>
         </div>
       </div>
     </section>
