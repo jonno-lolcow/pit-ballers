@@ -25,27 +25,17 @@
     <!-- HOME -->
     <section id="viewHome" class="view">
       <div class="homeLayout">
-
-        <!-- MAIN -->
         <div class="card">
           <h3 class="centerTitle">Team Browser</h3>
-
-          <!-- Arcade icon selector -->
           <div id="arcadeSelector" class="arcadeSelector"></div>
-
-          <!-- Big carousel -->
           <div id="browserCarousel" class="carousel browser"></div>
         </div>
 
-        <!-- RIGHT PANEL -->
         <aside class="card sidePanel">
           <h2>Game Modes</h2>
-
           <button id="goH2H" class="primary full">Head-to-Head</button>
           <button id="goTour" class="primary full">Tournament</button>
-
           <div class="divider"></div>
-
           <p class="hint">Use ← → to browse cards, or click an icon.</p>
         </aside>
       </div>
@@ -83,43 +73,59 @@
 
     <!-- TOURNAMENT -->
     <section id="viewTour" class="view hidden">
-      <div class="card">
-        <h2>Tournament</h2>
 
-        <div id="tourControls" class="row spaced">
-          <button id="genTour" class="secondary">Generate Bracket</button>
-          <button id="startTour" class="primary">Start Tournament</button>
+      <!-- Progress -->
+      <div class="card">
+        <div class="row spaced">
+          <h2 style="margin:0;">Tournament</h2>
+          <div id="tourStagePill" class="pill">Not started</div>
         </div>
 
-        <div id="tourInProgressBar" class="row spaced hidden">
-          <div class="pill">Tournament in progress</div>
-          <button id="resetTour" class="ghost">Reset</button>
+        <div class="progressWrap">
+          <div class="progressLabel">
+            <span>Progress</span>
+            <span id="progressText" class="mutedRight">0%</span>
+          </div>
+          <div class="progressBar">
+            <div id="progressFill" class="progressFill" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="row" id="tourTopControls">
+          <button id="genTour" class="secondary">Generate Bracket</button>
+          <button id="startTour" class="primary hidden">Start Tournament</button>
         </div>
 
         <p class="hint">32-slot bracket. 25 teams means 7 BYEs in Round 1 only. Round of 16 has no BYEs.</p>
       </div>
 
-      <div class="card">
-        <h3>Bracket</h3>
-        <div id="bracket" class="bracket"></div>
-      </div>
-
-      <div class="card">
-        <h3>Next Match</h3>
-        <div id="nextMatch" class="nextMatch">Generate a bracket to begin.</div>
-        <div class="row spaced">
-          <button id="playNext" class="primary">Play Next Match</button>
+      <div class="tourLayout">
+        <!-- Main bracket column -->
+        <div class="card">
+          <h3>Bracket</h3>
+          <div id="bracket" class="bracket"></div>
         </div>
+
+        <!-- Right sidebar (sticky) -->
+        <aside class="card tourSidebar">
+          <h3>Next Match</h3>
+          <div id="nextMatch" class="nextMatch">Generate a bracket to begin.</div>
+
+          <div class="divider"></div>
+
+          <button id="playNext" class="primary full" disabled>Play Next Match</button>
+
+          <div class="divider"></div>
+
+          <p class="hint">Tip: You can also use Skip during matches to auto-sim.</p>
+        </aside>
       </div>
 
-      <div id="winnerCard" class="card hidden">
-        <h2>Winners</h2>
-        <div class="winnerWrap">
-          <div class="winnerMeta">
-            <div id="winnerName" class="winnerName">—</div>
-            <div id="winnerOverall" class="hint">—</div>
-          </div>
-          <img id="winnerImg" class="winnerImg" alt="Winner card" />
+      <!-- Reset at very bottom -->
+      <div class="card">
+        <div class="row spaced">
+          <div class="hint">Need a fresh run?</div>
+          <button id="resetTour" class="ghost">Reset Tournament</button>
         </div>
       </div>
     </section>
@@ -173,7 +179,44 @@
       </div>
     </section>
 
-    <!-- RESULTS -->
+    <!-- WINNERS SCREEN -->
+    <section id="viewWinners" class="view hidden">
+      <div class="card">
+        <div class="row spaced">
+          <h2 style="margin:0;">Winners</h2>
+          <div class="pill">Tournament Complete</div>
+        </div>
+
+        <div class="winnerPro">
+          <div class="winnerLeft">
+            <div id="winnerName" class="winnerName">—</div>
+            <div id="winnerOverall" class="winnerOverall">Overall Score: —</div>
+
+            <div class="winnerStats">
+              <div class="stat">
+                <div class="k">Big Scorer (Largest Spread)</div>
+                <div id="bigScorer" class="v">—</div>
+              </div>
+              <div class="stat">
+                <div class="k">Biggest Loser</div>
+                <div id="bigLoser" class="v">—</div>
+              </div>
+            </div>
+
+            <div class="row">
+              <button id="winnersHome" class="primary">Back to Home</button>
+              <button id="winnersRestart" class="secondary">New Tournament</button>
+            </div>
+          </div>
+
+          <div class="winnerRight">
+            <img id="winnerImg" class="winnerImg" alt="Winner card" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULTS (H2H only) -->
     <section id="viewResults" class="view hidden">
       <div class="card">
         <h2>Results</h2>
