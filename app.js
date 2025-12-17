@@ -654,8 +654,8 @@ function init() {
     if (!chosenTeamA || !chosenTeamB || chosenTeamA.id === chosenTeamB.id) return;
     startMatch(chosenTeamA, chosenTeamB, {
       title: "Head-to-Head",
-      onComplete: (result) => showResultsH2H(chosenTeamA, chosenTeamB, result),
-      continueLabel: "View Results",
+      onComplete: () => setView("viewH2H"), // just return to picker
+      continueLabel: "Back",
       hideBackOnDone: false,
     });
   });
@@ -815,17 +815,32 @@ function startMatch(teamA, teamB, opts) {
       $("mScoreB").textContent = String(res.scoreB);
       $("mClock").textContent = `0.0s`;
       $("lastEvent").textContent = res.skipped ? "Skipped to end." : "Final.";
-
+    
       applyWinLoseStyling(teamA, teamB, res.scoreA, res.scoreB);
-
-     const isFinalUI = opts.hideBackOnDone === true;
-      
+    
+      const isFinalUI = opts.hideBackOnDone === true;
+      const isH2H = (currentMode === "H2H") || (opts.title === "Head-to-Head");
+    
+      // Start clean
+      $("backAfterMatch").classList.add("hidden");
+      $("continueAfterMatch").classList.add("hidden");
+      pendingContinue = null;
+    
+      // ✅ H2H: show ONLY Back (no continue / no "view results")
+      if (isH2H) {
+        $("backAfterMatch").classList.remove("hidden");
+        return;
+      }
+    
+      // ✅ Tournament: show Continue always, Back only if not final
       $("continueAfterMatch").classList.remove("hidden");
+      $("continueAfterMatch").textContent = isFinalUI
+        ? "Next"
+        : (opts.continueLabel ?? "Continue Tournament");
+    
       $("backAfterMatch").classList.toggle("hidden", isFinalUI);
-      
+    
       pendingContinue = () => opts.onComplete?.(res);
-      $("continueAfterMatch").textContent = isFinalUI ? "Next" : (opts.continueLabel ?? "Continue");
-
     }
   });
 }
