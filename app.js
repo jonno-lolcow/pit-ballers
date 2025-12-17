@@ -63,28 +63,20 @@ const UPSET_GAP_MIN = 10;       // only if skill diff > 10
 
 async function hydrateSponsorsFromFirestore() {
   try {
-    console.log("[FB] project:", firebase?.app?.().options?.projectId);
-    console.log("[FB] reading collection: teams");
-
     const snap = await window.db.collection("teams").get();
-    console.log("[FB] docs:", snap.size);
-
-    snap.forEach(d => console.log("[FB] doc", d.id, d.data()));
-
     const byId = new Map();
     snap.forEach(doc => byId.set(doc.id, doc.data()));
 
     for (const t of TEAMS) {
       const row = byId.get(t.id);
       if (row?.sponsorName) t.sponsor = row.sponsorName;
+      // optional (only keep if you actually want DB to override names)
+      // if (row?.name) t.name = row.name;
     }
-
-    console.log("[FB] t01 after hydrate:", TEAMS.find(t => t.id === "t01"));
   } catch (e) {
     console.warn("Sponsor load failed (using defaults):", e);
   }
 }
-
 
 function shouldTriggerUpset(teamA, teamB) {
   const gap = Math.abs(overallScore(teamA) - overallScore(teamB));
