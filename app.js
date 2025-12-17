@@ -698,10 +698,12 @@ function syncH2HSelection() {
   chosenTeamB = pickerB.getTeam();
 }
 
-function init() {
+async function init() {
   // warm cache ASAP (no await, just start it)
   preloadAllTeamAssets();
 
+  await hydrateSponsorsFromFirestore(); // <-- add this line 
+  
   // HOME
   browser = createCarousel($("browserCarousel"), TEAMS, 0, "browser");
   renderArcadeSelector($("arcadeSelector"), TEAMS, (idx) => {
