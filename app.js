@@ -78,6 +78,44 @@ async function hydrateSponsorsFromFirestore() {
   }
 }
 
+function buildWinnerRoute(tour) {
+  if (!tour?.winner) return [];
+  const champId = tour.winner.id;
+
+  const won = (tour.history || [])
+    .filter(m => m?.result?.winner?.id === champId)
+    .sort((a, b) => (a.round ?? 0) - (b.round ?? 0));
+
+  return won.map(m => {
+    const winnerIsA = m.a?.id === champId;
+    const opp = winnerIsA ? m.b : m.a;
+
+    const scoreW = winnerIsA ? m.result.scoreA : m.result.scoreB;
+    const scoreO = winnerIsA ? m.result.scoreB : m.result.scoreA;
+
+    return {
+      round: m.round,
+      label: roundLabel(m.round),
+      opponent: opp?.name ?? "—",
+      score: `${scoreW}–${scoreO}`,
+      isAuto: !!m.result.isAuto,
+      isBye: !!opp?.isBye,
+    };
+  });
+}
+
+function resetTournamentState() {
+  currentTour = null;
+
+  $("bracket") && ($("bracket").textContent = "");
+  $("nextMatch") && ($("nextMatch").textContent = "");
+  $("playNext") && ($("playNext").disabled = true);
+
+  ensureTournamentButtons();
+  updateProgressUI(null);
+}
+
+
 function shouldTriggerUpset(teamA, teamB) {
   const gap = Math.abs(overallScore(teamA) - overallScore(teamB));
   if (gap <= UPSET_GAP_MIN) return false;
@@ -181,6 +219,50 @@ async function preloadAllTeamAssets() {
   for (const t of TEAMS) urls.push(t.cardImg, t.iconImg);
   await Promise.all(urls.map(preloadImage));
 }
+
+function showWinnersScreen() {
+  const tour = currentTour;
+  if (!tour?.winner) return;
+
+  $("winnerName") && ($("winnerName").textContent = tour.winner.name);
+
+  if ($("winnerRating")) {
+    $("winnerRating").innerHTML = `
+      <div class="sponsorOnly large">
+        Sponsored by: ${tour.winner.sponsor ?? "Your Name Here"}
+      </div>
+    `;
+  }
+
+  // ✅ Route to final (always runs)
+  const routeEl = $("winnerRoute");
+  if (routeEl) {
+    const route = buildWinnerRoute(tour);
+
+    routeEl.innerHTML = route.length
+      ? route.map(r => `
+          <div class="routeRow">
+            <div class="routeRound">${r.label}</div>
+            <div class="routeLine">
+              vs <b>${r.opponent}</b>
+              <span class="muted">${r.isAuto || r.isBye ? "(BYE)" : r.score}</span>
+            </div>
+          </div>
+        `).join("")
+      : `<div class="muted">No route available.</div>`;
+  }
+
+  $("winnerImg") && ($("winnerImg").src = tour.winner.cardImg);
+  $("winnerSponsor") && ($("winnerSponsor").textContent = `Sponsored by: ${tour.winner.sponsor ?? "Your Name Here"}`);
+
+  // awards...
+  // (leave your bigScorer / bigLoser code as-is)
+
+  setView("viewWinners");
+  confettiBurst();
+  fireworksBurst(4);
+}
+
 
 // ==========================
 // Arcade selector
@@ -803,32 +885,15 @@ $("genTour")?.addEventListener("click", () => {
     };
   });
 }
-
-  
-
-  
-  // Winners screen buttons
-  function resetTournamentState() {
-  currentTour = null;
-
-  // Clear tournament UI bits (safe if not on that page)
-  if ($("bracket")) $("bracket").textContent = "";
-  if ($("nextMatch")) $("nextMatch").textContent = "";
-  if ($("playNext")) $("playNext").disabled = true;
-
-  ensureTournamentButtons?.();
-  updateProgressUI?.(null);
-}
     
   $("winnersHome")?.addEventListener("click", () => {
     resetTournamentState();
     goHome();
   });
+  
   $("winnersRestart")?.addEventListener("click", () => {
-    currentTour = null;
-    if ($("bracket")) $("bracket").textContent = "";
-    if ($("nextMatch")) $("nextMatch").textContent = "Generate a bracket to begin.";
-    ensureTournamentButtons();
+    resetTournamentState();
+    currentMode = "TOUR";
     setView("viewTour");
   });
 
