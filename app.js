@@ -768,12 +768,14 @@ function startMatch(teamA, teamB, opts) {
 
       applyWinLoseStyling(teamA, teamB, res.scoreA, res.scoreB);
 
+     const isFinalUI = opts.hideBackOnDone === true;
+      
       $("continueAfterMatch").classList.remove("hidden");
-      if (opts.hideBackOnDone) $("backAfterMatch").classList.add("hidden");
-      else $("backAfterMatch").classList.remove("hidden");
-
+      $("backAfterMatch").classList.toggle("hidden", isFinalUI);
+      
       pendingContinue = () => opts.onComplete?.(res);
-      $("continueAfterMatch").textContent = opts.continueLabel ?? "Continue";
+      $("continueAfterMatch").textContent = isFinalUI ? "Next" : (opts.continueLabel ?? "Continue");
+
     }
   });
 }
@@ -801,6 +803,7 @@ function playNextTournamentMatch() {
   const roundArr = currentTour.rounds[currentTour.currentRound - 1];
   if (!roundArr) return;
 
+  // Find the next real (non-bye) unresolved match
   let m = null;
   while (currentTour.currentMatchIndex < roundArr.length) {
     const candidate = roundArr[currentTour.currentMatchIndex];
@@ -808,6 +811,7 @@ function playNextTournamentMatch() {
     currentTour.currentMatchIndex++;
   }
 
+  // If no playable match, advance rounds and return to bracket
   if (!m) {
     buildNextRoundIfNeeded(currentTour);
     setNextMatchText(currentTour);
@@ -816,7 +820,8 @@ function playNextTournamentMatch() {
     return;
   }
 
-  const isFinalMatch = (m.round === 5);
+  // Robust “is final” detection (works even if round numbers change)
+  const isFinalMatch = (roundLabel(m.round) === "Final");
 
   startMatch(m.a, m.b, {
     title: `Tournament — ${roundLabel(m.round)}`,
@@ -846,12 +851,14 @@ function playNextTournamentMatch() {
       currentTour.currentMatchIndex++;
       buildNextRoundIfNeeded(currentTour);
 
-      // Final finished -> Winners screen
-      if (isFinalMatch && currentTour.winner) {
+      // ✅ Final -> Winners screen
+      if (isFinalMatch) {
+        // buildNextRoundIfNeeded should have set tour.winner here
         showWinnersScreen();
         return;
       }
 
+      // Normal flow back to bracket
       renderBracket(currentTour);
       setNextMatchText(currentTour);
       updateProgressUI(currentTour);
@@ -860,6 +867,7 @@ function playNextTournamentMatch() {
     }
   });
 }
+
 
 // Confetti burst
 function confettiBurst() {
