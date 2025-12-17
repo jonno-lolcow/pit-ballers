@@ -112,6 +112,22 @@ function setView(name) {
   }
 }
 
+function breakTie(scoreA, scoreB) {
+  if (scoreA !== scoreB) return { scoreA, scoreB, tieBreak: false, winnerSide: null };
+
+  // Sudden-death: give 1 point to a random side
+  if (Math.random() < 0.5) scoreA += 1;
+  else scoreB += 1;
+
+  return {
+    scoreA,
+    scoreB,
+    tieBreak: true,
+    winnerSide: (scoreA > scoreB ? "A" : "B"),
+  };
+}
+
+
 // ==========================
 // Image preloading (anti-lag)
 // ==========================
@@ -336,6 +352,16 @@ function runMatchRealtime(teamA, teamB, opts) {
     for (; i < planned.length; i++) applyEvent(planned[i]);
   }
 
+  function finish() {
+    // ensure no draw
+    const tb = breakTie(scoreA, scoreB);
+    scoreA = tb.scoreA;
+    scoreB = tb.scoreB;
+
+    done = true;
+    onDone?.({ scoreA, scoreB, skipped, upset, tieBreak: tb.tieBreak });
+  }
+
   function frame(now) {
     if (done) return;
 
@@ -350,8 +376,7 @@ function runMatchRealtime(teamA, teamB, opts) {
 
     if (elapsed >= DURATION) {
       applyRemaining();
-      done = true;
-      onDone?.({ scoreA, scoreB, skipped, upset }); // ✅ include upset
+      finish();
       return;
     }
 
@@ -367,8 +392,7 @@ function runMatchRealtime(teamA, teamB, opts) {
       skipped = true;
       cancelAnimationFrame(rafId);
       applyRemaining();
-      done = true;
-      onDone?.({ scoreA, scoreB, skipped, upset }); // ✅ include upset
+      finish();
     }
   };
 }
@@ -876,6 +900,9 @@ matchController = runMatchRealtime(teamA, teamB, {
       } else {
         $("lastEvent").textContent = res.skipped ? "Skipped to end." : "Final.";
       }
+     if (res.tieBreak && $("lastEvent")) {
+      $("lastEvent").textContent = "🔥 Overtime! Sudden-death winner!";
+      }
     }
 
     applyWinLoseStyling(teamA, teamB, res.scoreA, res.scoreB);
@@ -942,10 +969,7 @@ function playNextTournamentMatch() {
     onComplete: (res) => {
       let winner, loser;
 
-      if (res.scoreA === res.scoreB) {
-        winner = Math.random() < 0.5 ? m.a : m.b;
-        loser  = (winner.id === m.a.id) ? m.b : m.a;
-      } else if (res.scoreA > res.scoreB) {
+       if (res.scoreA > res.scoreB) {
         winner = m.a; loser = m.b;
       } else {
         winner = m.b; loser = m.a;
