@@ -737,10 +737,13 @@ function setSpeedUI(speed) {
 }
 
 function flashScorer(which) {
-  const el = which === "A" ? $("mScoreA") : $("mScoreB");
-  el.classList.remove("flash");
-  void el.offsetWidth;
-  el.classList.add("flash");
+  const scoreEl = which === "A" ? $("mScoreA") : $("mScoreB");
+  const tile = scoreEl.closest(".team");
+  if (!tile) return;
+
+  tile.classList.remove("flash");
+  void tile.offsetWidth;
+  tile.classList.add("flash");
 }
 
 function resetMatchWinLoseStyling() {
