@@ -649,19 +649,24 @@ function updateProgressUI(tour) {
 
 function ensureTournamentButtons() {
   const gen = $("genTour");
-  const start = $("startTour");
   const playNext = $("playNext");
+  const nextWrap = $("nextMatchWrap");
 
-  if (!gen || !start || !playNext) return;
+  if (!gen || !playNext || !nextWrap) return;
 
-  if (!currentTour) {
-    gen.classList.remove("hidden");
-    start.classList.add("hidden");
-    start.disabled = true;
-    updateProgressUI(null);
-    playNext.disabled = true;
-    return;
-  }
+  const hasBracket = !!currentTour;
+
+  // Generate button only before bracket exists
+  gen.classList.toggle("hidden", hasBracket);
+
+  // Next Match panel + Play button only after bracket exists
+  nextWrap.classList.toggle("hidden", !hasBracket);
+
+  updateProgressUI(currentTour);
+
+  // Play enabled when tournament exists (we auto-start on generate)
+  playNext.disabled = !hasBracket;
+}
 
   gen.classList.add("hidden");
 
@@ -759,20 +764,14 @@ async function init() {
   });
 
   // Tournament controls
-  $("genTour")?.addEventListener("click", () => {
-    currentTour = generateBracket32(TEAMS);
-    renderBracket(currentTour);
-    setNextMatchText(currentTour);
-    ensureTournamentButtons();
-  });
-
-  $("startTour")?.addEventListener("click", () => {
-    if (!currentTour) return;
-    currentTour.started = true;
-    setNextMatchText(currentTour);
-    ensureTournamentButtons();
-    $("playNext") && ($("playNext").disabled = false);
-  });
+$("genTour")?.addEventListener("click", () => {
+  currentTour = generateBracket32(TEAMS);
+  currentTour.started = true;              // <-- auto-start
+  renderBracket(currentTour);
+  setNextMatchText(currentTour);
+  ensureTournamentButtons();
+  $("playNext") && ($("playNext").disabled = false);
+});
 
   $("playNext")?.addEventListener("click", () => playNextTournamentMatch());
 
