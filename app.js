@@ -64,15 +64,15 @@ function keyFromName(name) {
 const TEAMS = TEAM_NAMES.map((name, idx) => ({
   id: `t${String(idx + 1).padStart(2, "0")}`,
   name,
+  skill: TEAM_SKILL[name] ?? 50, // ✅ add this
   sponsor: "Your Name Here",
   cardImg: `img/teams/${keyFromName(name)}.png`,
   iconImg: `img/icons/${keyFromName(name)}.png`,
 }));
 
 function overallScore(team) {
-  return team.skill;
+  return Number.isFinite(team?.skill) ? team.skill : (TEAM_SKILL[team?.name] ?? 50);
 }
-
 
 // Star mapping rules (with your examples)
 function scoreToStars(score) {
