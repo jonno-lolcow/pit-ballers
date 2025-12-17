@@ -75,8 +75,11 @@ function overallScore(team) {
 }
 
 function teamFooterHtml(team) {
-  const score = overallScore(team);
-  return ratingHtml(score, team.sponsor ?? "Your Name Here");
+  return `
+    <div class="sponsorOnly">
+      Sponsored by: ${team.sponsor ?? "Your Name Here"}
+    </div>
+  `;
 }
 
 // --- Utilities ---
