@@ -737,7 +737,7 @@ function setSpeedUI(speed) {
 }
 
 function flashScorer(which) {
-  const el = which === "A" ? $("mTeamA") : $("mTeamB");
+  const el = which === "A" ? $("mScoreA") : $("mScoreB");
   el.classList.remove("flash");
   void el.offsetWidth;
   el.classList.add("flash");
