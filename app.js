@@ -71,7 +71,7 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
 }));
 
 function overallScore(team) {
-  return Number.isFinite(team?.skill) ? team.skill : (TEAM_SKILL[team?.name] ?? 50);
+  return Number.isFe(team?.skill) ? team.skill : (TEAM_SKILL[team?.name] ?? 50);
 }
 
 function teamFooterHtml(team) {
@@ -161,8 +161,8 @@ function setArcadeActive(containerEl, index) {
 }
 
 // --- Carousel ---
-function createCarousel(containerEl, teams, initialIndex = 0, variant = "browser") {
-  let idx = initialIndex;
+function createCarousel(containerEl, teams, ialIndex = 0, variant = "browser") {
+  let idx = ialIndex;
 
   const left = document.createElement("button");
   left.className = "navBtn";
@@ -229,12 +229,17 @@ function createCarousel(containerEl, teams, initialIndex = 0, variant = "browser
 
   render();
 
-  return {
-    getIndex: () => idx,
-    getTeam: () => teams[idx],
-    setIndex: (n) => { idx = ((n % teams.length) + teams.length) % teams.length; render(); },
-    destroy: () => window.removeEventListener("keydown", onKey),
-  };
+return {
+  getIndex: () => idx,
+  getTeam: () => teams[idx],
+  setIndex: (n) => {
+    idx = ((n % teams.length) + teams.length) % teams.length;
+    render();
+    if (variant === "picker") syncH2HSelection();
+  },
+  destroy: () => window.removeEventListener("keydown", onKey),
+};
+
 }
 
 // --- Match simulation ---
@@ -598,7 +603,7 @@ let currentTour = null;
 let matchController = null;
 let pendingContinue = null;
 
-function init() {
+function () {
   preloadAllTeamAssets(); // warm cache ASAP
   // Home
   browser = createCarousel($("browserCarousel"), TEAMS, 0, "browser");
@@ -612,6 +617,13 @@ function init() {
   pickerA = createCarousel($("pickA"), TEAMS, 0, "picker");
   pickerB = createCarousel($("pickB"), TEAMS, 1, "picker");
 
+  function syncH2HSelection() {
+  chosenTeamA = pickerA.getTeam();
+  chosenTeamB = pickerB.getTeam();
+}
+
+syncH2HSelection();
+  
   // Nav
   $("btnHome").addEventListener("click", () => goHome());
   $("goH2H").addEventListener("click", () => {
@@ -628,21 +640,15 @@ function init() {
   });
 
   // H2H selects
-  $("setA").addEventListener("click", () => {
-    chosenTeamA = pickerA.getTeam();
-    $("chosenA").textContent = `${chosenTeamA.name}`;
-  });
-  $("setB").addEventListener("click", () => {
-    chosenTeamB = pickerB.getTeam();
-    $("chosenB").textContent = `${chosenTeamB.name}`;
-  });
+
   $("randH2H").addEventListener("click", () => {
     const i = randInt(0, TEAMS.length - 1);
     let j = randInt(0, TEAMS.length - 1);
     while (j === i) j = randInt(0, TEAMS.length - 1);
-
+  
     pickerA.setIndex(i);
     pickerB.setIndex(j);
+  });
 
     chosenTeamA = TEAMS[i];
     chosenTeamB = TEAMS[j];
