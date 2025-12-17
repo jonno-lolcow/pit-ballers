@@ -577,6 +577,50 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
   font-size:12px;
 }
 
+.trophyWrap{
+  display:grid;
+  place-items:center;
+  margin-bottom:10px;
+  position:relative;
+}
+.trophyImg{
+  width:110px;
+  height:auto;
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
+}
+.trophyFallback{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  font-size:56px;
+  opacity:0;
+  pointer-events:none;
+}
+
+/* Fireworks layer */
+.fireworks{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+}
+.fireworks .spark{
+  position:absolute;
+  width:6px;
+  height:6px;
+  border-radius:999px;
+  opacity:.95;
+  animation: spark 900ms ease-out forwards;
+  box-shadow: 0 0 18px rgba(255,255,255,.25);
+}
+@keyframes spark{
+  0%   { transform: translate(0,0) scale(1); opacity:0; }
+  10%  { opacity:.95; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(.6); opacity:0; }
+}
+
+
 /* Confetti */
 .confetti{
   position:absolute;
