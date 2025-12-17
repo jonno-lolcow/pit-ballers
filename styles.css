@@ -417,6 +417,14 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
   width:0%;
 }
 
+#tourHeaderCard .row.spaced {
+  align-items: center;
+}
+#tourStagePill {
+  font-size: 12px;
+  padding: 6px 10px;
+}
+
 /* Tournament layout with sidebar */
 .tourLayout {
   display: grid;
