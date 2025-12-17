@@ -73,7 +73,6 @@
 
     <!-- TOURNAMENT -->
     <section id="viewTour" class="view hidden">
-
       <!-- Progress -->
       <div class="card">
         <div class="row spaced">
@@ -114,6 +113,7 @@
           <div class="divider"></div>
 
           <button id="playNext" class="primary full" disabled>Play Next Match</button>
+          <button id="endTour" class="primary full hidden">End Tournament</button>
 
           <div class="divider"></div>
 
@@ -159,16 +159,16 @@
         </div>
 
         <div class="matchCards">
-          <div class="matchCard">
+          <div id="matchCardA" class="matchCard">
             <div id="mcNameA" class="cardHeading">—</div>
             <img id="mcImgA" alt="Team A card" />
-            <div id="mcOverallA" class="cardFooter">Overall Score: —</div>
+            <div id="mcFooterA" class="cardFooter"></div>
           </div>
 
-          <div class="matchCard">
+          <div id="matchCardB" class="matchCard">
             <div id="mcNameB" class="cardHeading">—</div>
             <img id="mcImgB" alt="Team B card" />
-            <div id="mcOverallB" class="cardFooter">Overall Score: —</div>
+            <div id="mcFooterB" class="cardFooter"></div>
           </div>
         </div>
 
@@ -181,7 +181,9 @@
 
     <!-- WINNERS SCREEN -->
     <section id="viewWinners" class="view hidden">
-      <div class="card">
+      <div class="card winnersCard">
+        <div id="confetti" class="confetti" aria-hidden="true"></div>
+
         <div class="row spaced">
           <h2 style="margin:0;">Winners</h2>
           <div class="pill">Tournament Complete</div>
@@ -190,7 +192,7 @@
         <div class="winnerPro">
           <div class="winnerLeft">
             <div id="winnerName" class="winnerName">—</div>
-            <div id="winnerOverall" class="winnerOverall">Overall Score: —</div>
+            <div id="winnerRating" class="winnerOverall">—</div>
 
             <div class="winnerStats">
               <div class="stat">
@@ -211,6 +213,7 @@
 
           <div class="winnerRight">
             <img id="winnerImg" class="winnerImg" alt="Winner card" />
+            <div id="winnerSponsor" class="sponsorLine"></div>
           </div>
         </div>
       </div>
