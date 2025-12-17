@@ -91,24 +91,25 @@
     <!-- TOURNAMENT -->
     <section id="viewTour" class="view hidden">
       <!-- Progress -->
-      <div class="card">
-      <div class="titleBar">
-        <div></div>
-        <h2 class="titleBarTitle">Tournament</h2>
-        <div id="tourStagePill" class="pill">Not started</div>
-      </div>
-        
-        <div class="progressWrap">
-          <div class="progressLabel">
-            <span>Progress</span>
-            <span id="progressText" class="mutedRight">0%</span>
-          </div>
-          <div class="progressBar">
-            <div id="progressFill" class="progressFill" style="width:0%"></div>
+      <div class="card" id="tourHeaderCard">
+        <div class="row spaced">
+          <h2 style="margin:0;">Tournament</h2>
+          <div id="tourStagePill" class="pill">Not started</div>
+        </div>
+      
+        <div id="tourHeaderDetails">
+          <div class="progressWrap">
+            <div class="progressLabel">
+              <span>Progress</span>
+              <span id="progressText" class="mutedRight">0%</span>
+            </div>
+            <div class="progressBar">
+              <div id="progressFill" class="progressFill" style="width:0%"></div>
+            </div>
           </div>
         </div>
       </div>
-
+      
       <div class="tourLayout">
         <!-- Main bracket column -->
         <div class="card">
