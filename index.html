@@ -43,22 +43,25 @@
     <!-- H2H SETUP -->
     <section id="viewH2H" class="view hidden">
       <div class="card">
-        <h2>Head-to-Head</h2>
-
+        <div class="row spaced" style="align-items:center;">
+          <h2 style="margin:0;">Head-to-Head</h2>
+    
+          <div class="h2hControls">
+            <button id="randH2H" class="secondary">Randomize</button>
+            <button id="startH2H" class="primary">Start Match</button>
+          </div>
+        </div>
+    
+        <div class="divider"></div>
+    
         <div class="grid2">
           <div>
             <div id="pickA" class="carousel picker"></div>
           </div>
-
           <div>
             <div id="pickB" class="carousel picker"></div>
           </div>
         </div>
-
-      <div class="h2hControls">
-        <button id="randH2H" class="secondary">Randomize</button>
-        <button id="startH2H" class="primary">Start Match</button>
-      </div>
       </div>
     </section>
 
@@ -126,7 +129,7 @@
       <div class="card">
       <div class="matchTopBar">
         <button id="backAfterMatch" class="ghost hidden">Back</button>
-        <h2 id="matchTitle" class="matchTitleCentered">Match</h2>
+        <h2 id="matchTitle" class="matchTitleCenter">Match</h2>
         <button id="continueAfterMatch" class="primary hidden">Continue</button>
       </div>
 
