@@ -674,3 +674,17 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
 }
 .resultItem .k{ color:var(--muted); font-size:12px; }
 .resultItem .v{ font-weight:1000; font-size:16px; margin-top:4px; }
+
+/* Hide Team A / Team B names in the score tiles */
+#viewMatch #mTeamA,
+#viewMatch #mTeamB {
+  display: none;
+}
+
+/* Make the live scores bigger */
+#viewMatch #mScoreA,
+#viewMatch #mScoreB {
+  font-size: clamp(48px, 6vw, 86px);
+  line-height: 1;
+}
+
