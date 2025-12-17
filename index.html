@@ -235,15 +235,21 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 
 <script>
-  // Your Firebase config (from Firebase Console → Project settings → Your apps → Web app)
   const firebaseConfig = {
-    apiKey: "…",
-    authDomain: "…",
-    projectId: "…",
-    storageBucket: "…",
-    messagingSenderId: "…",
-    appId: "…"
+    apiKey: "AIzaSyB23VXC2PvAMx9foZoa22ciyku7Dghf5jQ",          // <-- paste from that screen
+    authDomain: "pit-ballers.firebaseapp.com",
+    projectId: "pit-ballers",
+    storageBucket: "pit-ballers.appspot.com",
+    messagingSenderId: "10961796042",
+    appId: "1:10961796042:web:9dcc8d72c204abd7d4ed33"
+    // measurementId optional — ignore for Firestore
   };
+
+  firebase.initializeApp(firebaseConfig);
+  window.db = firebase.firestore();
+</script>
+<script src="app.js"></script>
+
 
   firebase.initializeApp(firebaseConfig);
   window.db = firebase.firestore();
