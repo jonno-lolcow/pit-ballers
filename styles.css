@@ -756,3 +756,19 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
   border-radius: 12px;
   min-width: 140px;
 }
+
+.titleBar{
+  display:grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items:center;
+  gap:12px;
+}
+
+.titleBarTitle{
+  margin:0;
+  text-align:center;
+}
+
+.titleBar > :last-child{
+  justify-self:end;
+}
