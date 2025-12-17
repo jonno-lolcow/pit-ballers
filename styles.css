@@ -322,6 +322,28 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
   object-fit:cover;
 }
 
+/* Head-to-Head controls */
+.h2hControls {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 18px;
+  padding: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.h2hControls button {
+  min-width: 180px;
+  padding: 14px 22px;
+  font-size: 15px;
+  border-radius: 14px;
+}
+
+.h2hControls .primary {
+  font-size: 16px;
+  padding: 16px 26px;
+}
+
 /* Tournament progress */
 .progressWrap{ margin: 10px 0 6px; }
 .progressLabel{
