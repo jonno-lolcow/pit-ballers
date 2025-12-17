@@ -904,6 +904,8 @@ matchController = runMatchRealtime(teamA, teamB, {
   }
 });
 
+}
+
 function playNextTournamentMatch() {
   if (!currentTour || !currentTour.started || currentTour.winner) return;
 
