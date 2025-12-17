@@ -351,7 +351,7 @@ function runMatchRealtime(teamA, teamB, opts) {
     if (elapsed >= DURATION) {
       applyRemaining();
       done = true;
-      onDone?.({ scoreA, scoreB, skipped });
+      onDone?.({ scoreA, scoreB, skipped, upset }); // ✅ include upset
       return;
     }
 
@@ -368,7 +368,7 @@ function runMatchRealtime(teamA, teamB, opts) {
       cancelAnimationFrame(rafId);
       applyRemaining();
       done = true;
-      onDone?.({ scoreA, scoreB, skipped });
+      onDone?.({ scoreA, scoreB, skipped, upset }); // ✅ include upset
     }
   };
 }
@@ -838,7 +838,6 @@ function startMatch(teamA, teamB, opts) {
   if ($("mScoreA")) $("mScoreA").textContent = "0";
   if ($("mScoreB")) $("mScoreB").textContent = "0";
   if ($("lastEvent")) $("lastEvent").textContent = "—";
-  if (upset) $("lastEvent").textContent = "😱 Wow — What an upset!!!";
   if ($("mClock")) $("mClock").textContent = "30.0s";
 
   hydrateMatchCards(teamA, teamB);
@@ -850,62 +849,60 @@ function startMatch(teamA, teamB, opts) {
   matchController = null;
   pendingContinue = null;
 
-  matchController = runMatchRealtime(teamA, teamB, {
-    onUpdate: ({ elapsedMs, scoreA, scoreB, lastEvent }) => {
-      const remaining = Math.max(0, 30000 - elapsedMs);
-      if ($("mClock")) $("mClock").textContent = `${(remaining / 1000).toFixed(1)}s`;
-      if ($("mScoreA")) $("mScoreA").textContent = String(scoreA);
-      if ($("mScoreB")) $("mScoreB").textContent = String(scoreB);
+matchController = runMatchRealtime(teamA, teamB, {
+  onUpdate: ({ elapsedMs, scoreA, scoreB, lastEvent }) => {
+    const remaining = Math.max(0, 30000 - elapsedMs);
+    if ($("mClock")) $("mClock").textContent = `${(remaining / 1000).toFixed(1)}s`;
+    if ($("mScoreA")) $("mScoreA").textContent = String(scoreA);
+    if ($("mScoreB")) $("mScoreB").textContent = String(scoreB);
 
-      if (lastEvent && $("lastEvent")) {
-        const who = lastEvent.scorer === "A" ? teamA.name : teamB.name;
-        $("lastEvent").textContent = `${who} +${lastEvent.points}`;
-        flashScorer(lastEvent.scorer);
-      }
-    },
-    onDone: (res) => {
-      if ($("mScoreA")) $("mScoreA").textContent = String(res.scoreA);
-      if ($("mScoreB")) $("mScoreB").textContent = String(res.scoreB);
-      if ($("mClock"))  $("mClock").textContent  = "0.0s";
-    
-      if (upset) {
+    if (lastEvent && $("lastEvent")) {
+      const who = lastEvent.scorer === "A" ? teamA.name : teamB.name;
+      $("lastEvent").textContent = `${who} +${lastEvent.points}`;
+      flashScorer(lastEvent.scorer);
+    }
+  },
+
+  onDone: (res) => {
+    if ($("mScoreA")) $("mScoreA").textContent = String(res.scoreA);
+    if ($("mScoreB")) $("mScoreB").textContent = String(res.scoreB);
+    if ($("mClock"))  $("mClock").textContent  = "0.0s";
+
+    if ($("lastEvent")) {
+      if (res.upset) {
         $("lastEvent").textContent = res.skipped
           ? "😱 Wow — What an upset!!! (Skipped)"
           : "😱 Wow — What an upset!!!";
       } else {
-        $("lastEvent").textContent = res.skipped
-          ? "Skipped to end."
-          : "Final.";
+        $("lastEvent").textContent = res.skipped ? "Skipped to end." : "Final.";
       }
-    
-      applyWinLoseStyling(teamA, teamB, res.scoreA, res.scoreB);
     }
 
-      const isFinalUI = opts.hideBackOnDone === true;
-      const isH2H = (currentMode === "H2H") || (opts.title === "Head-to-Head");
+    applyWinLoseStyling(teamA, teamB, res.scoreA, res.scoreB);
 
-      // Start clean
-      $("backAfterMatch")?.classList.add("hidden");
-      $("continueAfterMatch")?.classList.add("hidden");
-      pendingContinue = null;
+    const isFinalUI = opts.hideBackOnDone === true;
+    const isH2H = (currentMode === "H2H") || (opts.title === "Head-to-Head");
 
-      // H2H: Back only
-      if (isH2H) {
-        $("backAfterMatch")?.classList.remove("hidden");
-        return;
-      }
+    $("backAfterMatch")?.classList.add("hidden");
+    $("continueAfterMatch")?.classList.add("hidden");
+    pendingContinue = null;
 
-      // Tournament: Continue always, Back only if not final
-      $("continueAfterMatch")?.classList.remove("hidden");
-      if ($("continueAfterMatch")) {
-        $("continueAfterMatch").textContent = isFinalUI ? "Next" : (opts.continueLabel ?? "Continue Tournament");
-      }
-      $("backAfterMatch")?.classList.toggle("hidden", isFinalUI);
-
-      pendingContinue = () => opts.onComplete?.(res);
+    if (isH2H) {
+      $("backAfterMatch")?.classList.remove("hidden");
+      return;
     }
-  });
-}
+
+    $("continueAfterMatch")?.classList.remove("hidden");
+    if ($("continueAfterMatch")) {
+      $("continueAfterMatch").textContent = isFinalUI
+        ? "Next"
+        : (opts.continueLabel ?? "Continue Tournament");
+    }
+    $("backAfterMatch")?.classList.toggle("hidden", isFinalUI);
+
+    pendingContinue = () => opts.onComplete?.(res);
+  }
+});
 
 function playNextTournamentMatch() {
   if (!currentTour || !currentTour.started || currentTour.winner) return;
