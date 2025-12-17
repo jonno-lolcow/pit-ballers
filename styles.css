@@ -1,6 +1,5 @@
 :root{
   --bg:#0b0f17;
-  --card:#121a28;
   --text:#e7eefc;
   --muted:#8ea0bd;
   --border:#22314c;
@@ -56,7 +55,6 @@ body{
   margin: 14px auto 44px;
   padding: 0 14px;
 }
-
 .view{ display:grid; gap:12px; }
 .hidden{ display:none; }
 
@@ -79,6 +77,8 @@ h3{ font-size:16px; }
   margin:8px 0 0;
 }
 
+.mutedRight{ color:var(--muted); font-weight:900; }
+
 /* Controls */
 .row{
   display:flex;
@@ -99,7 +99,7 @@ button{
   font-weight:900;
 }
 button:hover{ border-color:rgba(78,161,255,.7); }
-button:disabled{ opacity:.5; cursor:not-allowed; }
+button:disabled{ opacity:.45; cursor:not-allowed; }
 
 .primary{
   background: linear-gradient(180deg, rgba(78,161,255,.35), rgba(78,161,255,.18));
@@ -141,7 +141,6 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
   .homeLayout{ grid-template-columns: 1fr 240px; }
 }
 @media (max-width: 980px){
-  /* still usable, but not “mobile designed” */
   .homeLayout{ grid-template-columns: 1fr; }
 }
 .sidePanel{
@@ -161,7 +160,6 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
   background:rgba(0,0,0,.12);
   margin-bottom:12px;
 }
-
 .arcadeIcon{
   width:52px;
   height:52px;
@@ -252,14 +250,12 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
   object-fit:cover;
 }
 
-/* Head-to-Head grid */
+/* Head-to-Head */
 .grid2{
   display:grid;
   grid-template-columns: 1fr 1fr;
   gap:12px;
 }
-
-/* H2H: fit viewport height, and ensure both columns actually fit */
 #viewH2H .card{
   height: calc(100vh - 110px);
   overflow: hidden;
@@ -272,11 +268,10 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
   padding:8px;
   gap:6px;
 }
-
-/* Key fix: size pickers by container width (not vw) */
+/* fill available column width (fix empty real-estate issue) */
 .carousel.picker img{
   width: 100%;
-  max-width: 640px;
+  max-width: 720px;
   aspect-ratio: 1 / 1;
   height: auto;
   border-radius:16px;
@@ -284,7 +279,53 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
   object-fit:cover;
 }
 
-/* Tournament bracket */
+/* Tournament progress */
+.progressWrap{
+  margin: 10px 0 6px;
+}
+.progressLabel{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-weight:1000;
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:6px;
+}
+.progressBar{
+  height:12px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,.16);
+  overflow:hidden;
+}
+.progressFill{
+  height:100%;
+  border-radius:999px;
+  background: linear-gradient(90deg, rgba(78,161,255,.70), rgba(88,255,155,.55));
+  width:0%;
+}
+
+/* Tournament layout with sidebar */
+.tourLayout{
+  display:grid;
+  grid-template-columns: 1fr 320px;
+  gap:12px;
+  align-items:start;
+}
+@media (max-width: 1100px){
+  .tourLayout{ grid-template-columns: 1fr 300px; }
+}
+@media (max-width: 980px){
+  .tourLayout{ grid-template-columns: 1fr; }
+}
+.tourSidebar{
+  position:sticky;
+  top:78px;
+  align-self:start;
+}
+
+/* Bracket */
 .bracket{ display:grid; gap:12px; }
 
 .roundSection{
@@ -293,7 +334,6 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
   background: rgba(0,0,0,.10);
   overflow:hidden;
 }
-
 .roundHeader{
   display:flex;
   justify-content:space-between;
@@ -304,19 +344,16 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
   user-select:none;
   background: rgba(255,255,255,.03);
 }
-
 .roundHeader .meta{
   color: var(--muted);
   font-size: 12px;
   font-weight: 900;
 }
-
 .roundBody{
   padding:10px;
   display:grid;
   gap:10px;
 }
-
 .roundSection.collapsed .roundBody{ display:none; }
 
 .matchLine{
@@ -329,7 +366,6 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
   border-radius:12px;
   background: rgba(0,0,0,.12);
 }
-
 .vs{ color:var(--muted); font-weight:1000; }
 
 .teamCell{
@@ -348,13 +384,11 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
   object-fit:cover;
   flex: 0 0 auto;
 }
-
 .teamNameText{
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
 }
-
 .teamNameText.win{ color: var(--win); font-weight:1000; }
 .teamNameText.lose{ color: var(--lose); font-weight:1000; }
 .teamNameText.bye{ color: var(--muted); }
@@ -365,28 +399,6 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
   font-size: 12px;
 }
 
-/* Winner card */
-.winnerWrap{
-  display:grid;
-  gap:12px;
-  justify-items:center;
-}
-.winnerMeta{
-  text-align:center;
-}
-.winnerName{
-  font-size:22px;
-  font-weight:1000;
-}
-.winnerImg{
-  width: min(960px, 80vw, 62vh);
-  aspect-ratio: 1 / 1;
-  height:auto;
-  border-radius:18px;
-  border:1px solid rgba(255,255,255,.10);
-  object-fit:cover;
-}
-
 /* Match view */
 .scoreboard{
   display:grid;
@@ -394,7 +406,6 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
   gap:12px;
   align-items:center;
 }
-
 .team{
   border:1px solid var(--border);
   border-radius:14px;
@@ -415,7 +426,6 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
   text-align:center;
   letter-spacing:1px;
 }
-
 .center{
   border:1px solid var(--border);
   border-radius:14px;
@@ -450,8 +460,6 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
   border-radius:16px;
   background:rgba(0,0,0,.12);
 }
-
-/* Match cards: fit vertically (desktop) */
 .matchCard img{
   width: 100%;
   max-width: 720px;
@@ -471,6 +479,53 @@ button:disabled{ opacity:.5; cursor:not-allowed; }
 }
 .teamName.flash{
   animation: scoreFlash 280ms ease-out;
+}
+
+/* Winners screen */
+.winnerPro{
+  display:grid;
+  grid-template-columns: 1fr 520px;
+  gap:14px;
+  align-items:start;
+}
+@media (max-width: 1200px){
+  .winnerPro{ grid-template-columns: 1fr 480px; }
+}
+@media (max-width: 980px){
+  .winnerPro{ grid-template-columns: 1fr; }
+}
+
+.winnerName{
+  font-size:28px;
+  font-weight:1000;
+  letter-spacing:.6px;
+}
+.winnerOverall{
+  color:var(--muted);
+  margin-top:6px;
+  font-weight:1000;
+}
+.winnerStats{
+  display:grid;
+  gap:10px;
+  margin:14px 0;
+}
+.stat{
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+  background:rgba(0,0,0,.12);
+}
+.stat .k{ color:var(--muted); font-size:12px; font-weight:1000; }
+.stat .v{ margin-top:4px; font-weight:1000; }
+
+.winnerImg{
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  height:auto;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.10);
+  object-fit:cover;
 }
 
 /* Results */
