@@ -781,8 +781,49 @@ $("genTour")?.addEventListener("click", () => {
   });
   $("continueAfterMatch")?.addEventListener("click", () => pendingContinue?.());
 
+  function buildWinnerRoute(tour) {
+  if (!tour?.winner) return [];
+
+  // matches the champion won (exclude BYE auto-advances if you want)
+  const won = tour.history
+    .filter(m => m?.result?.winner?.id === tour.winner.id)
+    .sort((a, b) => (a.round ?? 0) - (b.round ?? 0));
+
+  return won.map(m => {
+    const opp = (m.a.id === tour.winner.id) ? m.b : m.a;
+    const scoreW = (m.a.id === tour.winner.id) ? m.result.scoreA : m.result.scoreB;
+    const scoreO = (m.a.id === tour.winner.id) ? m.result.scoreB : m.result.scoreA;
+
+    return {
+      round: m.round,
+      label: roundLabel(m.round),
+      opponent: opp?.name ?? "—",
+      score: `${scoreW}–${scoreO}`,
+      isAuto: !!m.result.isAuto,
+    };
+  });
+}
+
+  
+
+  
   // Winners screen buttons
-  $("winnersHome")?.addEventListener("click", () => goHome());
+  function resetTournamentState() {
+  currentTour = null;
+
+  // Clear tournament UI bits (safe if not on that page)
+  if ($("bracket")) $("bracket").textContent = "";
+  if ($("nextMatch")) $("nextMatch").textContent = "";
+  if ($("playNext")) $("playNext").disabled = true;
+
+  ensureTournamentButtons?.();
+  updateProgressUI?.(null);
+}
+    
+  $("winnersHome")?.addEventListener("click", () => {
+    resetTournamentState();
+    goHome();
+  });
   $("winnersRestart")?.addEventListener("click", () => {
     currentTour = null;
     if ($("bracket")) $("bracket").textContent = "";
@@ -1096,6 +1137,22 @@ function showWinnersScreen() {
         Sponsored by: ${tour.winner.sponsor ?? "Your Name Here"}
       </div>
     `;
+
+  const routeEl = $("winnerRoute");
+if (routeEl) {
+  const route = buildWinnerRoute(tour);
+
+  routeEl.innerHTML = route.length
+    ? route.map(r => `
+        <div class="routeRow">
+          <div class="routeRound">${r.label}</div>
+          <div class="routeLine">
+            vs <b>${r.opponent}</b> <span class="muted">${r.isAuto ? "(BYE)" : r.score}</span>
+          </div>
+        </div>
+      `).join("")
+    : `<div class="muted">No route available.</div>`;
+}
   }
 
   if ($("winnerImg")) $("winnerImg").src = tour.winner.cardImg;
