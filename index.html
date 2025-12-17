@@ -183,6 +183,7 @@
     <section id="viewWinners" class="view hidden">
       <div class="card winnersCard">
         <div id="confetti" class="confetti" aria-hidden="true"></div>
+        <div id="fireworks" class="fireworks" aria-hidden="true"></div>
 
         <div class="row spaced">
           <h2 style="margin:0;">Winners</h2>
@@ -211,10 +212,16 @@
             </div>
           </div>
 
-          <div class="winnerRight">
-            <img id="winnerImg" class="winnerImg" alt="Winner card" />
-            <div id="winnerSponsor" class="sponsorLine"></div>
+        <div class="winnerRight">
+          <div class="trophyWrap">
+            <img id="trophyImg" class="trophyImg" src="img/ui/trophy.png" alt="Trophy" />
+            <div class="trophyFallback" aria-hidden="true">🏆</div>
           </div>
+        
+          <img id="winnerImg" class="winnerImg" alt="Winner card" />
+          <div id="winnerSponsor" class="sponsorLine"></div>
+        </div>
+
         </div>
       </div>
     </section>
