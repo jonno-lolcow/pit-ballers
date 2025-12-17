@@ -606,6 +606,17 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
   pointer-events:none;
 }
 
+.sponsorOnly {
+  font-size: 0.95rem;
+  opacity: 0.9;
+  text-align: center;
+}
+
+.sponsorOnly.large {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
 /* Fireworks layer */
 .fireworks{
   position:absolute;
