@@ -164,13 +164,31 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
 .linkBtn{
   display:flex;
   align-items:center;
-  justify-content:center;
-  padding:12px 14px;
+  justify-content:center;padding:14px 16px;
   border-radius:14px;
+
+  background: linear-gradient(180deg, #1f3b66, #162a47);
+  border:1px solid rgba(255,255,255,.2);
+
+  color:#fff;
+  font-weight:600;
   text-decoration:none;
-  border:1px solid rgba(255,255,255,.12);
+
+  cursor:pointer;
+  pointer-events:auto;
+  user-select:none;
+
+  transition: all .15s ease;
 }
-.linkBtn.full{ width:100%; }
+
+.linkBtn:hover{
+  background: linear-gradient(180deg, #2c5ea8, #1f3b66);
+  transform: translateY(-1px);
+}
+
+.linkBtn:active{
+  transform: translateY(0);
+}
 
 .supporters{
   font-size:14px;
