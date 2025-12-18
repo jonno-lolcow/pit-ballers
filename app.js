@@ -102,17 +102,18 @@
   // =========================================================
   // 3) TEAMS (MODEL)
   // =========================================================
-const TEAMS = TEAM_NAMES
-  .slice() // defensive copy
-  .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))
-  .map((name, idx) => ({
-    id: `t${String(idx + 1).padStart(2, "0")}`,
-    name,
-    skill: TEAM_SKILL[name] ?? 50,
-    sponsor: "Your Name Here",
-    cardImg: `img/teams/${keyFromName(name)}.png`,
-    iconImg: `img/icons/${keyFromName(name)}.png`,
-  }));
+const TEAMS = TEAM_NAMES.map((name, idx) => ({
+  id: `t${String(idx + 1).padStart(2, "0")}`, // keep Firestore alignment
+  name,
+  skill: TEAM_SKILL[name] ?? 50,
+  sponsor: "Your Name Here",
+  cardImg: `img/teams/${keyFromName(name)}.png`,
+  iconImg: `img/icons/${keyFromName(name)}.png`,
+}));
+
+  const TEAMS_SORTED = [...TEAMS].sort((a, b) =>
+  a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+);
 
   function overallScore(team) {
     return Number.isFinite(team?.skill) ? team.skill : (TEAM_SKILL[team?.name] ?? 50);
@@ -1133,6 +1134,18 @@ const TEAMS = TEAM_NAMES
     pickerA = createCarousel($("pickA"), TEAMS, 0, "picker", () => syncH2HSelection());
     pickerB = createCarousel($("pickB"), TEAMS, 1, "picker", () => syncH2HSelection());
     syncH2HSelection();
+
+    browser = createCarousel($("browserCarousel"), TEAMS_SORTED, 0, "browser");
+    renderArcadeSelector($("arcadeSelector"), TEAMS_SORTED, (idx) => {
+      browser.setIndex(idx);
+      setArcadeActive($("arcadeSelector"), idx);
+    });
+    setArcadeActive($("arcadeSelector"), browser.getIndex());
+
+    pickerA = createCarousel($("pickA"), TEAMS_SORTED, 0, "picker", () => syncH2HSelection());
+    pickerB = createCarousel($("pickB"), TEAMS_SORTED, 1, "picker", () => syncH2HSelection());
+
+
 
     // NAV
     $("btnHome")?.addEventListener("click", goHome);
