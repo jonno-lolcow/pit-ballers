@@ -1,5 +1,6 @@
 // =========================================================
 // Pit Ballers — app.js (full replacement, cleaned + premium)
+// (Sorting removed completely; single source of truth = TEAMS)
 // =========================================================
 (() => {
   "use strict";
@@ -35,6 +36,8 @@
     "Lolcow Alpha": 36,
   };
 
+  // IMPORTANT: This order is now the canonical order across the app.
+  // Sponsors in Firestore are keyed by TEAMS[i].id, so don't reorder this list unless you migrate Firestore ids.
   const TEAM_NAMES = [
     "Lolcow Balls",
     "Lolcow Pit",
@@ -100,20 +103,17 @@
   }
 
   // =========================================================
-  // 3) TEAMS (MODEL)
+  // 3) TEAMS (MODEL) — SINGLE SOURCE OF TRUTH
   // =========================================================
-const TEAMS = TEAM_NAMES.map((name, idx) => ({
-  id: `t${String(idx + 1).padStart(2, "0")}`, // keep Firestore alignment
-  name,
-  skill: TEAM_SKILL[name] ?? 50,
-  sponsor: "Your Name Here",
-  cardImg: `img/teams/${keyFromName(name)}.png`,
-  iconImg: `img/icons/${keyFromName(name)}.png`,
-}));
-
-  const TEAMS_SORTED = [...TEAMS].sort((a, b) =>
-  a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
-);
+  const TEAMS = TEAM_NAMES.map((name, idx) => ({
+    // Keep Firestore alignment (team doc ids like t01, t02...)
+    id: `t${String(idx + 1).padStart(2, "0")}`,
+    name,
+    skill: TEAM_SKILL[name] ?? 50,
+    sponsor: "Your Name Here",
+    cardImg: `img/teams/${keyFromName(name)}.png`,
+    iconImg: `img/icons/${keyFromName(name)}.png`,
+  }));
 
   function overallScore(team) {
     return Number.isFinite(team?.skill) ? team.skill : (TEAM_SKILL[team?.name] ?? 50);
@@ -131,7 +131,6 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
   // 4) FIRESTORE (SPONSORS)
   // =========================================================
   async function hydrateSponsorsFromFirestore() {
-    // If firebase isn't configured / fails, silently keep defaults.
     try {
       if (!window.db?.collection) return;
 
@@ -139,10 +138,11 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
       const byId = new Map();
       snap.forEach((doc) => byId.set(doc.id, doc.data()));
 
+      // Hydrate into TEAMS (same ids as Firestore docs)
       for (const t of TEAMS) {
         const row = byId.get(t.id);
         if (row?.sponsorName) t.sponsor = row.sponsorName;
-        // Optional override:
+        // Optional name override (only if you intend it)
         // if (row?.name) t.name = row.name;
       }
     } catch (e) {
@@ -267,7 +267,7 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
       img.classList.add("isLoading");
 
       preloadImage(targetSrc).then(() => {
-        if (img.dataset.src !== targetSrc) return; // user moved on
+        if (img.dataset.src !== targetSrc) return;
         img.src = targetSrc;
         img.classList.remove("isLoading");
       });
@@ -288,7 +288,7 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
     left.addEventListener("click", prev);
     right.addEventListener("click", next);
 
-    // Keyboard support (only when this carousel is visible)
+    // Keyboard support (only when visible)
     const onKey = (e) => {
       if (containerEl.closest(".hidden")) return;
       if (e.key === "ArrowLeft") prev();
@@ -368,11 +368,8 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
 
   function breakTie(scoreA, scoreB) {
     if (scoreA !== scoreB) return { scoreA, scoreB, tieBreak: false };
-
-    // Sudden-death: 1 point random
     if (Math.random() < 0.5) scoreA += 1;
     else scoreB += 1;
-
     return { scoreA, scoreB, tieBreak: true };
   }
 
@@ -452,6 +449,7 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
   function generateBracket32(teams) {
     const shuffled = shuffle(teams);
     const byesNeeded = 32 - shuffled.length;
+
     const byeObj = () => ({
       id: `bye_${Math.random().toString(16).slice(2)}`,
       name: "BYE",
@@ -551,7 +549,7 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
   }
 
   // =========================================================
-  // 10) TOURNAMENT UI (Bracket + Next Match + Progress)
+  // 10) TOURNAMENT UI
   // =========================================================
   function renderTeamCell(team, side, result) {
     const cell = document.createElement("div");
@@ -705,22 +703,22 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
     else pill.textContent = "Bracket ready";
   }
 
-  function ensureTournamentButtons(currentTour) {
+  function ensureTournamentButtons(tour) {
     const gen = $("genTour");
     const playNext = $("playNext");
     const nextWrap = $("nextMatchWrap");
     if (!gen || !playNext || !nextWrap) return;
 
-    const hasBracket = !!currentTour;
+    const hasBracket = !!tour;
     gen.classList.toggle("hidden", hasBracket);
     nextWrap.classList.toggle("hidden", !hasBracket);
 
-    updateProgressUI(currentTour);
+    updateProgressUI(tour);
     playNext.disabled = !hasBracket;
   }
 
   // =========================================================
-  // 11) WINNERS (Route + Awards + FX)
+  // 11) WINNERS
   // =========================================================
   function buildWinnerRoute(tour) {
     if (!tour?.winner) return [];
@@ -760,17 +758,11 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
       const d = document.createElement("div");
       d.className = "c";
 
-      const left = Math.random() * 100;
-      const delay = Math.random() * 0.25;
-      const dur = 1.2 + Math.random() * 1.2;
-      const sizeW = 8 + Math.random() * 6;
-      const sizeH = 10 + Math.random() * 10;
-
-      d.style.left = `${left}%`;
-      d.style.animationDelay = `${delay}s`;
-      d.style.animationDuration = `${dur}s`;
-      d.style.width = `${sizeW}px`;
-      d.style.height = `${sizeH}px`;
+      d.style.left = `${Math.random() * 100}%`;
+      d.style.animationDelay = `${Math.random() * 0.25}s`;
+      d.style.animationDuration = `${(1.2 + Math.random() * 1.2).toFixed(2)}s`;
+      d.style.width = `${8 + Math.random() * 6}px`;
+      d.style.height = `${10 + Math.random() * 10}px`;
       d.style.background = colors[Math.floor(Math.random() * colors.length)];
 
       box.appendChild(d);
@@ -800,11 +792,8 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
 
         const ang = Math.random() * Math.PI * 2;
         const dist = 90 + Math.random() * 180;
-        const dx = Math.cos(ang) * dist;
-        const dy = Math.sin(ang) * dist;
-
-        s.style.setProperty("--dx", `${dx}px`);
-        s.style.setProperty("--dy", `${dy}px`);
+        s.style.setProperty("--dx", `${Math.cos(ang) * dist}px`);
+        s.style.setProperty("--dy", `${Math.sin(ang) * dist}px`);
         s.style.animationDelay = `${b * 160 + Math.random() * 120}ms`;
 
         box.appendChild(s);
@@ -824,9 +813,7 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
     };
   }
 
-  // NOTE: expects the *new* premium winners HTML (single #winnerRoute)
-  function showWinnersScreen(currentTour) {
-    const tour = currentTour;
+  function showWinnersScreen(tour) {
     if (!tour?.winner) return;
 
     $("winnerName") && ($("winnerName").textContent = tour.winner.name);
@@ -839,7 +826,6 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
       `;
     }
 
-    // Route to final
     const routeEl = $("winnerRoute");
     if (routeEl) {
       const route = buildWinnerRoute(tour);
@@ -859,7 +845,6 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
     $("winnerImg") && ($("winnerImg").src = tour.winner.cardImg);
     $("winnerSponsor") && ($("winnerSponsor").textContent = `Sponsored by: ${tour.winner.sponsor ?? "Your Name Here"}`);
 
-    // Awards
     if ($("bigScorer")) {
       if (tour.awards.bigScorer) {
         const b = tour.awards.bigScorer;
@@ -886,12 +871,12 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
   // =========================================================
   // 12) MATCH VIEW UI
   // =========================================================
-  function setSpeedUI(matchController, speed) {
+  function setSpeedUI(controller, speed) {
     for (const [id, s] of [["speed1", 1], ["speed2", 2], ["speed4", 4]]) {
       const el = $(id);
       if (el) el.classList.toggle("active", s === speed);
     }
-    matchController?.setSpeed(speed);
+    controller?.setSpeed(speed);
   }
 
   function flashScorer(which) {
@@ -902,7 +887,7 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
     if (!tile) return;
 
     tile.classList.remove("flash");
-    void tile.offsetWidth; // reflow
+    void tile.offsetWidth;
     tile.classList.add("flash");
   }
 
@@ -981,8 +966,6 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
     $("continueAfterMatch")?.classList.add("hidden");
     pendingContinue = null;
 
-    // reset speed UI + controller
-    matchController = null;
     matchController = runMatchRealtime(teamA, teamB, {
       onUpdate: ({ elapsedMs, scoreA, scoreB, lastEvent }) => {
         const remaining = Math.max(0, MATCH_DURATION_MS - elapsedMs);
@@ -1035,7 +1018,6 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
       },
     });
 
-    // default speed
     setSpeedUI(matchController, 1);
   }
 
@@ -1116,13 +1098,10 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
   // 14) INIT / WIRING
   // =========================================================
   async function init() {
-    // Start asset preloading asap
     preloadAllTeamAssets();
-
-    // Pull sponsors (if available)
     await hydrateSponsorsFromFirestore();
 
-    // HOME carousel + selector
+    // HOME carousel + selector (uses TEAMS ONLY)
     browserCarousel = createCarousel($("browserCarousel"), TEAMS, 0, "browser");
     renderArcadeSelector($("arcadeSelector"), TEAMS, (idx) => {
       browserCarousel?.setIndex(idx);
@@ -1130,22 +1109,10 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
     });
     if ($("arcadeSelector") && browserCarousel) setArcadeActive($("arcadeSelector"), browserCarousel.getIndex());
 
-    // H2H pickers (auto-sync)
+    // H2H pickers (uses TEAMS ONLY)
     pickerA = createCarousel($("pickA"), TEAMS, 0, "picker", () => syncH2HSelection());
     pickerB = createCarousel($("pickB"), TEAMS, 1, "picker", () => syncH2HSelection());
     syncH2HSelection();
-
-    browser = createCarousel($("browserCarousel"), TEAMS_SORTED, 0, "browser");
-    renderArcadeSelector($("arcadeSelector"), TEAMS_SORTED, (idx) => {
-      browser.setIndex(idx);
-      setArcadeActive($("arcadeSelector"), idx);
-    });
-    setArcadeActive($("arcadeSelector"), browser.getIndex());
-
-    pickerA = createCarousel($("pickA"), TEAMS_SORTED, 0, "picker", () => syncH2HSelection());
-    pickerB = createCarousel($("pickB"), TEAMS_SORTED, 1, "picker", () => syncH2HSelection());
-
-
 
     // NAV
     $("btnHome")?.addEventListener("click", goHome);
@@ -1191,7 +1158,7 @@ const TEAMS = TEAM_NAMES.map((name, idx) => ({
     // Tournament controls
     $("genTour")?.addEventListener("click", () => {
       currentTour = generateBracket32(TEAMS);
-      currentTour.started = true; // auto-start
+      currentTour.started = true;
       renderBracket(currentTour);
       setNextMatchText(currentTour);
       ensureTournamentButtons(currentTour);
