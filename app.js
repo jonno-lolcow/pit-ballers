@@ -102,7 +102,10 @@
   // =========================================================
   // 3) TEAMS (MODEL)
   // =========================================================
-  const TEAMS = TEAM_NAMES.map((name, idx) => ({
+const TEAMS = TEAM_NAMES
+  .slice() // defensive copy
+  .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))
+  .map((name, idx) => ({
     id: `t${String(idx + 1).padStart(2, "0")}`,
     name,
     skill: TEAM_SKILL[name] ?? 50,
