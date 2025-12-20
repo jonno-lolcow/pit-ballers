@@ -312,12 +312,21 @@
   // =========================================================
   // 8) MATCH SIM (Realtime + Upsets)
   // =========================================================
-  function shouldTriggerUpset(teamA, teamB) {
-    const gap = Math.abs(overallScore(teamA) - overallScore(teamB));
-    if (gap <= UPSET_GAP_MIN) return false;
-    return Math.random() < UPSET_CHANCE;
-  }
+function shouldTriggerUpset(teamA, teamB) {
+  const gap = Math.abs(overallScore(teamA) - overallScore(teamB));
+  if (gap < UPSET_GAP_MIN) return false; // 10+ qualifies
+  return Math.random() < UPSET_CHANCE;
+}
 
+function isUpsetResult(teamA, teamB, scoreA, scoreB) {
+  // winner/loser by score
+  const winner = (scoreA > scoreB) ? teamA : teamB;
+  const loser  = (scoreA > scoreB) ? teamB : teamA;
+
+  const gap = overallScore(loser) - overallScore(winner); // positive if underdog won
+  return gap >= UPSET_GAP_MIN;
+}
+  
   function choose2or3() {
     return Math.random() < 0.7 ? 2 : 3;
   }
@@ -377,7 +386,7 @@
     const { onUpdate, onDone } = opts || {};
     let speed = 1;
 
-    const { planned, upset } = planMatch(teamA, teamB);
+const { planned, upset: upsetPlanned } = planMatch(teamA, teamB);
 
     let scoreA = 0, scoreB = 0, i = 0;
     let rafId = null, done = false, skipped = false;
@@ -398,8 +407,15 @@
       scoreB = tb.scoreB;
 
       done = true;
-      onDone?.({ scoreA, scoreB, skipped, upset, tieBreak: tb.tieBreak });
-    };
+      onDone?.({
+      scoreA,
+      scoreB,
+      skipped,
+      upset,              // <-- this now means "was an upset outcome"
+      upsetPlanned,       // <-- optional debug, remove if you don't want it
+      tieBreak: tb.tieBreak
+    });
+  };
 
     const frame = (now) => {
       if (done) return;
