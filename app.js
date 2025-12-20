@@ -406,6 +406,8 @@ const { planned, upset: upsetPlanned } = planMatch(teamA, teamB);
       scoreA = tb.scoreA;
       scoreB = tb.scoreB;
 
+        const upset = isUpsetResult(teamA, teamB, scoreA, scoreB); // ✅ add this
+      
       done = true;
       onDone?.({
       scoreA,
