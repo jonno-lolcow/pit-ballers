@@ -11,10 +11,8 @@
   const TEAM_SKILL = {
     "Lolcow Balls": 54,
     "Lolcow Pit": 58,
-    "Lolcow Queens (a)": 58,
-    "Lolcow Queens (b)": 52,
-    "Lolcow Live (a)": 57,
-    "Lolcow Live (b)": 59,
+    "Lolcow Queens": 58,
+    "Lolcow Live": 57,
     "Lolcow Rebel": 37,
     "Lolcow Nerd": 49,
     "Lolcow Babe": 27,
@@ -31,7 +29,6 @@
     "Lolcow Cash (a)": 42,
     "Lolcow Cash (b)": 53,
     "Lolcow Wild (a)": 20,
-    "Lolcow Wild (b)": 30,
     "Lolcow Boss": 65,
     "Lolcow Alpha": 43,
   };
@@ -41,10 +38,8 @@
   const TEAM_NAMES = [
     "Lolcow Balls",
     "Lolcow Pit",
-    "Lolcow Queens (a)",
-    "Lolcow Queens (b)",
-    "Lolcow Live (a)",
-    "Lolcow Live (b)",
+    "Lolcow Queens",
+    "Lolcow Live",
     "Lolcow Rebel",
     "Lolcow Nerd",
     "Lolcow Babe",
@@ -60,8 +55,7 @@
     "Lolcow Nuts",
     "Lolcow Cash (a)",
     "Lolcow Cash (b)",
-    "Lolcow Wild (a)",
-    "Lolcow Wild (b)",
+    "Lolcow Wild",
     "Lolcow Boss",
     "Lolcow Alpha",
   ];
