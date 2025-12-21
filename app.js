@@ -28,7 +28,7 @@
     "Lolcow Nuts": 51,
     "Lolcow Cash (a)": 42,
     "Lolcow Cash (b)": 53,
-    "Lolcow Wild (a)": 20,
+    "Lolcow Wild": 20,
     "Lolcow Boss": 65,
     "Lolcow Alpha": 43,
   };
